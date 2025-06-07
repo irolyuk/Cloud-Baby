@@ -91,6 +91,8 @@ h1 {
 @media (max-width: 600px) {
   .chat-container {
     padding: 15px;
+    margin-left: 5%;
+    margin-right: 5%;
     height: 95vh;
   }
 
