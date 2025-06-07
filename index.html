@@ -15,8 +15,8 @@
     <input type="password" id="passwordInput" placeholder="Введіть пароль" />
     <div id="nicknameSelection" style="display: none;">
       <p>Виберіть нікнейм:</p>
-      <button onclick="chooseNickname('Baby😎')">Baby😎</button>
-      <button onclick="chooseNickname('Pink Cloud☁')">Pink Cloud☁</button>
+      <button onclick="chooseNickname('Baby😎')">Baby</button>
+      <button onclick="chooseNickname('Pink Cloud☁️')">Pink Cloud</button>
     </div>
     <button onclick="checkPassword()">Увійти</button>
     <p id="loginError" style="color:red;"></p>
@@ -35,6 +35,16 @@
   <script>
     let selectedNickname = null;
     let socket = null;
+
+    const avatars = {
+     "Baby😎": "😎",
+     "Pink Cloud☁️": "☁️"
+    };
+    
+    const userColors = {
+     "Baby😎": "message-baby",
+     "Pink Cloud☁️": "message-cloud"
+    };
 
     function checkPassword() {
       const password = document.getElementById('passwordInput').value;
@@ -61,24 +71,32 @@
       socket.emit("register", selectedNickname); // передаємо нік
 
       socket.on("chat_history", (messages) => {
-        const chat = document.getElementById("chat");
-        messages.forEach((data) => {
-          const div = document.createElement("div");
-          div.textContent = `${data.user}: ${data.text}`;
-          div.classList.add("message");
-          chat.appendChild(div);
-        });
-        scrollToBottom();
-      });
+  messages.forEach((data) => {
+    const div = document.createElement("div");
+    div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+    div.classList.add("message");
+
+    const colorClass = userColors[data.user];
+    if (colorClass) div.classList.add(colorClass);
+
+    chat.appendChild(div);
+  });
+  scrollToBottom();
+});
+
 
       socket.on("message", (data) => {
-        const chat = document.getElementById("chat");
-        const div = document.createElement("div");
-        div.classList.add("message");
-        div.textContent = `${data.user}: ${data.text}`;
-        chat.appendChild(div);
-        scrollToBottom();
-      });
+  const div = document.createElement("div");
+  div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+  div.classList.add("message");
+
+  // Додай кольоровий клас
+  const colorClass = userColors[data.user];
+  if (colorClass) div.classList.add(colorClass);
+
+  chat.appendChild(div);
+  scrollToBottom();
+});
 
       socket.on("users_online", (users) => {
         document.getElementById('users-online').textContent = "🟢 Онлайн: " + users.join(", ");
