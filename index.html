@@ -26,8 +26,10 @@
 });
 
 socket.on("message", (data) => {
+    const parsedData = JSON.parse(data);  // Розпаковуємо JSON
+
     const div = document.createElement("div");
-    div.textContent = `${data.user}: ${data.text}`;
+    div.textContent = `${parsedData.user}: ${parsedData.text}`;
     chat.appendChild(div);
 });
 
@@ -36,6 +38,8 @@ function sendMessage() {
     if (msg) {
         socket.emit("message", msg);
         msgInput.value = "";
+    }
+}
     }
 }
 
