@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Мій чат</title>
+  <title>Наш власний чат</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; }
@@ -11,10 +11,11 @@
   </style>
 </head>
 <body>
-  <h1>Чат для двох</h1>
+  <h1>Наш з тобою чат квітко</h1>
   <div id="chat"></div>
   <input type="text" id="msgInput" placeholder="Напиши повідомлення..." />
   <button onclick="sendMessage()">Надіслати</button>
+  <div id="users-online">🟢 Онлайн: </div>
 
   <script>
     const chat = document.getElementById('chat');
@@ -26,10 +27,8 @@
 });
 
 socket.on("message", (data) => {
-    const parsedData = JSON.parse(data);  // Розпаковуємо JSON
-
     const div = document.createElement("div");
-    div.textContent = `${parsedData.user}: ${parsedData.text}`;
+    div.textContent = `${data.user}: ${data.text}`;
     chat.appendChild(div);
 });
 
@@ -40,6 +39,13 @@ function sendMessage() {
         msgInput.value = "";
     }
 }
+const usersOnlineDiv = document.getElementById('users-online');
+
+// Отримуємо список активних користувачів
+socket.on("users_online", (users) => {
+    usersOnlineDiv.innerHTML = "🟢 Онлайн: " + users.join(", ");
+});
+
 
   </script>
 </body>
