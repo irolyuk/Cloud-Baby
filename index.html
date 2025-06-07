@@ -14,7 +14,7 @@
   <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
   <button class="chat-button" onclick="sendMessage()">Надіслати</button>
   <div id="users-online">🟢 Онлайн: </div>
-  <div id="typing-indicator" class="online-users"></div>
+  <div id="typing-indicator" class="users-online"></div>
   </div>
 
   <script>
@@ -35,6 +35,17 @@ socket.on("message", (data) => {
     scrollToBottom(); // ✅ Не забудь прокрутку вниз
 });
 
+socket.emit("get_history");
+
+socket.on("chat_history", (messages) => {
+  messages.forEach((data) => {
+    const div = document.createElement("div");
+    div.textContent = `${data.user}: ${data.text}`;
+    chat.appendChild(div);
+  });
+});
+
+
 let typingTimeout;
 
 msgInput.addEventListener("input", () => {
@@ -49,7 +60,7 @@ socket.on("typing", (data) => {
   const typingDiv = document.getElementById("typing-indicator");
 
   if (data.typing) {
-    typingDiv.textContent = `${data.user} друкує...`;
+    typingDiv.textContent = `${data.user} шось там цікавеньке пише...`;
   } else {
     typingDiv.textContent = "";
   }

@@ -33,6 +33,22 @@ def handle_typing(is_typing):
     user = users.get(request.sid, "Unknown")
     emit("typing", {"user": user, "typing": is_typing}, broadcast=True, include_self=False)
 
+history = []
+
+@socketio.on('message')
+def handle_message(msg):
+    user = users.get(request.sid, "Unknown")
+    message_data = {"user": user, "text": msg}
+    history.append(message_data)
+    if len(history) > 50:
+        history.pop(0)
+    send(message_data, broadcast=True)
+
+@socketio.on('get_history')
+def handle_history():
+    emit("chat_history", history)
+
+
 
 if __name__ == '__main__':
     import os
