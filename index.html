@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Наш власний чат</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
 </head>
 <body>
+
   <!-- Екран входу -->
   <div class="login-screen" id="loginScreen">
     <h2>Вхід у чат</h2>
@@ -21,127 +22,114 @@
     <p id="loginError" style="color:red;"></p>
   </div>
 
-  <!-- Основний чат -->
+  <!-- Чат -->
   <div class="chat-container" id="chatContainer" style="display: none;">
     <h1>🌸 Наш з тобою чат квітко 🌸</h1>
-    <div id="chat" class="chat-box"></div>  
+    <div id="chat" class="chat-box"></div>
     <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
-    <button class="chat-button" onclick="sendMessage()">Надіслати</button>
+    <button class="chat-button">Надіслати</button>
     <div id="users-online">🟢 Онлайн: </div>
     <div id="typing-indicator" class="users-online"></div>
   </div>
-</body>
-
 
   <script>
     let selectedNickname = null;
+    let socket = null;
 
-function checkPassword() {
-  const password = document.getElementById('passwordInput').value;
-  if (password === "26060512") {
-    document.getElementById('nicknameSelection').style.display = "block";
-    document.getElementById('loginError').textContent = "";
-  } else {
-    document.getElementById('loginError').textContent = "Неправильний пароль.";
-  }
-}
-
-
-function chooseNickname(nick) {
-  selectedNickname = nick;
-
-  // Сховати екран входу, показати чат
-  document.getElementById('loginScreen').style.display = "none";
-  document.getElementById('chatContainer').style.display = "flex";
-
-  startChat(); // Запуск сокета після вибору ніку
-}
-
-
-    const chat = document.getElementById('chat');
-    const msgInput = document.getElementById('msgInput');   
-    let socket; 
-
-    function sendMessage() {    
-    const msg = msgInput.value.trim();
-    if (msg) {
-        socket.emit("message", msg);
-        msgInput.value = "";
+    function checkPassword() {
+      const password = document.getElementById('passwordInput').value;
+      if (password === "26060512") {
+        document.getElementById('nicknameSelection').style.display = "block";
+        document.getElementById('loginError').textContent = "";
+      } else {
+        document.getElementById('loginError').textContent = "Неправильний пароль.";
+      }
     }
-}
+
+    function chooseNickname(nick) {
+      selectedNickname = nick;
+      document.getElementById('loginScreen').style.display = "none";
+      document.getElementById('chatContainer').style.display = "flex";
+      startChat();
+    }
 
     function startChat() {
-    socket = io("https://cloud-baby.onrender.com", {
-    transports: ["websocket"]
-  });
+      socket = io("https://cloud-baby.onrender.com", {
+        transports: ["websocket"]
+      });
 
-  socket.emit("register", selectedNickname); // передаємо нік
+      socket.emit("register", selectedNickname); // передаємо нік
 
-  socket.on("message", (data) => {
-  const div = document.createElement("div");
-  div.classList.add("message");
-  div.textContent = `${data.user}: ${data.text}`;
-  chat.appendChild(div);
-  scrollToBottom();
-});
+      socket.on("chat_history", (messages) => {
+        const chat = document.getElementById("chat");
+        messages.forEach((data) => {
+          const div = document.createElement("div");
+          div.textContent = `${data.user}: ${data.text}`;
+          div.classList.add("message");
+          chat.appendChild(div);
+        });
+        scrollToBottom();
+      });
 
+      socket.on("message", (data) => {
+        const chat = document.getElementById("chat");
+        const div = document.createElement("div");
+        div.classList.add("message");
+        div.textContent = `${data.user}: ${data.text}`;
+        chat.appendChild(div);
+        scrollToBottom();
+      });
 
-socket.emit("get_history");
+      socket.on("users_online", (users) => {
+        document.getElementById('users-online').textContent = "🟢 Онлайн: " + users.join(", ");
+      });
 
-socket.on("chat_history", (messages) => {
-  messages.forEach((data) => {
-    const div = document.createElement("div");
-    div.textContent = `${data.user}: ${data.text}`;
-    chat.appendChild(div);
-  });
-});
+      socket.on("typing", (data) => {
+        const typingDiv = document.getElementById("typing-indicator");
+        if (data.typing) {
+          typingDiv.textContent = `${data.user} шось там цікавеньке пише...люблячи тебе дуже сильно!`;
+        } else {
+          typingDiv.textContent = "";
+        }
+      });
 
-  let typingTimeout;
+      socket.emit("get_history");
 
-msgInput.addEventListener("input", () => {
-  socket.emit("typing", true);
+      const msgInput = document.getElementById("msgInput");
+      let typingTimeout;
 
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    socket.emit("typing", false);
-  }, 2000); // Через 2 секунди без введення — прибираємо статус
-});
-socket.on("typing", (data) => {
-  const typingDiv = document.getElementById("typing-indicator");
+      msgInput.addEventListener("input", () => {
+        socket.emit("typing", true);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          socket.emit("typing", false);
+        }, 2000);
+      });
 
-  if (data.typing) {
-    typingDiv.textContent = `${data.user} шось там цікавеньке пише...люблячи тебе дуже сильно!`;
-  } else {
-    typingDiv.textContent = "";
-  }
-});
+      msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
 
+      document.querySelector(".chat-button").addEventListener("click", sendMessage);
+    }
 
+    function sendMessage() {
+      const msgInput = document.getElementById("msgInput");
+      const msg = msgInput.value.trim();
+      if (msg && socket) {
+        socket.emit("message", msg);
+        msgInput.value = "";
+      }
+    }
 
-
-msgInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-const usersOnlineDiv = document.getElementById('users-online');
-
-// Отримуємо список активних користувачів
-socket.on("users_online", (users) => {
-    usersOnlineDiv.innerHTML = "🟢 Онлайн: " + users.join(", ");
-});
-
-function scrollToBottom() {
-  const chatBox = document.getElementById("chat");
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// викликається після додавання нового повідомлення
-scrollToBottom();
-
-}
-
+    function scrollToBottom() {
+      const chatBox = document.getElementById("chat");
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
   </script>
+
+</body>
 </html>
