@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>Наш власний чат</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>  
 </head>
 <body>
+  <div class="chat-container">
   <h1>Наш з тобою чат квітко</h1>
   <div id="chat"></div>
   <input type="text" id="msgInput" placeholder="Напиши повідомлення..." />
   <button onclick="sendMessage()">Надіслати</button>
   <div id="users-online">🟢 Онлайн: </div>
+  </div>
 
   <script>
     const chat = document.getElementById('chat');
