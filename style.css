@@ -7,24 +7,30 @@ body {
 
 h1 {
     color: #ff69b4;
+    font-size: 2rem;
 }
 
 #chat {
     border: 2px solid #ff69b4;
     border-radius: 10px;
     height: 300px;
-    width: 80%;
+    width: 60%;
     margin: auto;
     padding: 10px;
     overflow-y: auto;
     background-color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 input, button {
-    font-size: 16px;
-    padding: 10px;
-    border-radius: 5px;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 8px;
     border: 1px solid #ccc;
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
 }
 
 button {
@@ -37,8 +43,27 @@ button:hover {
     background-color: #d85a94;
 }
 
-#users-online {
-    font-weight: bold;
-    color: green;
-    margin-bottom: 10px;
+/* 📱 Адаптивний дизайн для мобільних */
+@media screen and (max-width: 768px) {
+    #chat {
+        width: 90%;
+        height: 250px;
+    }
+
+    input, button {
+        font-size: 16px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* 🏢 Адаптивний дизайн для великих екранів */
+@media screen and (min-width: 1200px) {
+    #chat {
+        width: 50%;
+        height: 400px;
+    }
 }
