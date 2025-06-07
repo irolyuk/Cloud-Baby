@@ -104,3 +104,16 @@ h1 {
     font-size: 1.3rem;
   }
 }
+
+.chat-box {
+  background-color: #fffafc;
+  border: 1px solid #f8cdda;
+  border-radius: 10px;
+  padding: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  font-size: 1rem;
+
+  /* ДОДАЙ межу висоти */
+  max-height: 60vh; /* або конкретне значення, напр. 400px */
+}
