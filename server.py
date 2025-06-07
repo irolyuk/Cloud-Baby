@@ -28,6 +28,12 @@ def handle_message(msg):
 def index():
     return "WebSocket сервер працює!"
 
+@socketio.on('typing')
+def handle_typing(is_typing):
+    user = users.get(request.sid, "Unknown")
+    emit("typing", {"user": user, "typing": is_typing}, broadcast=True, include_self=False)
+
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 10000))

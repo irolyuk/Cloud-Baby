@@ -10,15 +10,17 @@
 <body>
   <div class="chat-container">
   <h1>Наш з тобою чат квітко</h1>
-  <div id="chat" class="chat-box"></div>
+  <div id="chat" class="chat-box"></div>  
   <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
   <button class="chat-button" onclick="sendMessage()">Надіслати</button>
   <div id="users-online">🟢 Онлайн: </div>
+  <div id="typing-indicator" class="online-users"></div>
   </div>
 
   <script>
     const chat = document.getElementById('chat');
     const msgInput = document.getElementById('msgInput');
+    const msg = msgInput.value.trim();
 
     // Правильне підключення до серверу Render
     const socket = io("https://cloud-baby.onrender.com", {
@@ -31,6 +33,36 @@ socket.on("message", (data) => {
     div.textContent = `${data.user}: ${data.text}`;
     chat.appendChild(div);
     scrollToBottom(); // ✅ Не забудь прокрутку вниз
+});
+
+let typingTimeout;
+
+msgInput.addEventListener("input", () => {
+  socket.emit("typing", true);
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    socket.emit("typing", false);
+  }, 2000); // Через 2 секунди без введення — прибираємо статус
+});
+socket.on("typing", (data) => {
+  const typingDiv = document.getElementById("typing-indicator");
+
+  if (data.typing) {
+    typingDiv.textContent = `${data.user} друкує...`;
+  } else {
+    typingDiv.textContent = "";
+  }
+});
+
+
+
+
+msgInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 
 function sendMessage() {
