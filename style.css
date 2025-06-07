@@ -1,107 +1,69 @@
-/* Загальні стилі */
 body {
     font-family: "Arial", sans-serif;
-    background-color: #ffe6f2; /* Ніжно-рожевий фон */
+    background-color: #f9f9f9;
     text-align: center;
-    margin: 0;
-    padding: 0;
+    margin: 20px;
 }
 
-/* Заголовок */
 h1 {
-    color: #ff4081;
+    color: #ff69b4;
     font-size: 2rem;
-    margin-bottom: 10px;
 }
 
-/* Контейнер чату */
-#chat-container {
-    width: 90%;
-    max-width: 600px;
-    margin: auto;
-    padding: 15px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Вікно чату */
 #chat {
-    border: 2px solid #ff4081;
+    border: 2px solid #ff69b4;
     border-radius: 10px;
-    height: 350px;
+    height: 300px;
+    width: 60%;
+    margin: auto;
+    padding: 10px;
     overflow-y: auto;
     background-color: white;
-    padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
-/* Повідомлення */
-.message {
-    max-width: 80%;
-    padding: 8px 12px;
-    margin: 5px;
-    border-radius: 15px;
-    font-size: 16px;
-}
-
-/* Повідомлення Baby */
-.baby {
-    background-color: #ff4081;
-    color: white;
-    align-self: flex-start;
-}
-
-/* Повідомлення Pink Cloud */
-.pink-cloud {
-    background-color: #ffc1e3;
-    color: black;
-    align-self: flex-end;
-}
-
-/* Форма вводу */
-#message-input {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-input {
-    flex: 1;
+input, button {
+    font-size: 18px;
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    font-size: 16px;
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
 }
 
 button {
-    background-color: #ff4081;
+    background-color: #ff69b4;
     color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
     cursor: pointer;
-    margin-left: 8px;
-    font-size: 16px;
 }
 
 button:hover {
     background-color: #d85a94;
 }
 
-/* Адаптивний дизайн */
+/* 📱 Адаптивний дизайн для мобільних */
 @media screen and (max-width: 768px) {
-    #chat-container {
-        width: 100%;
-        border-radius: 0;
-    }
-
     #chat {
-        height: 300px;
+        width: 90%;
+        height: 250px;
     }
 
     input, button {
-        font-size: 14px;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* 🏢 Адаптивний дизайн для великих екранів */
+@media screen and (min-width: 1200px) {
+    #chat {
+        width: 50%;
+        height: 400px;
     }
 }
