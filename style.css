@@ -180,6 +180,8 @@ h1 {
   flex-direction: column;
   align-items: center;       /* Центрування вмісту по горизонталі */
   text-align: center;        /* Центрування тексту для h2 та p */
+  margin-left: 5%;
+  margin-right: 5%;
 }
 
 .login-screen h2 {
