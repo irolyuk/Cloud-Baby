@@ -90,7 +90,7 @@ button:hover {
     background-color: #d85a94;
 }
 
-/* Адаптивний дизайн йо*/
+/* Адаптивний дизайн */
 @media screen and (max-width: 768px) {
     #chat-container {
         width: 100%;
