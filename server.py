@@ -7,10 +7,15 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 users = {}  # Зберігає нікнейми активних користувачів
+history = []
 
 @socketio.on('connect')
 def handle_connect():
-    users[request.sid] = "Baby😎" if len(users) == 0 else "Pink Cloud☁"
+    pass  # Очікуємо нікнейм окремо
+
+@socketio.on('register')
+def handle_register(nickname):
+    users[request.sid] = nickname
     emit("users_online", list(users.values()), broadcast=True)
 
 @socketio.on('disconnect')
@@ -18,22 +23,6 @@ def handle_disconnect():
     if request.sid in users:
         del users[request.sid]
     emit("users_online", list(users.values()), broadcast=True)
-
-@socketio.on('message')
-def handle_message(msg):
-    user = users.get(request.sid, "Unknown")
-    send({"user": user, "text": msg}, broadcast=True)
-
-@app.route('/')
-def index():
-    return "WebSocket сервер працює!"
-
-@socketio.on('typing')
-def handle_typing(is_typing):
-    user = users.get(request.sid, "Unknown")
-    emit("typing", {"user": user, "typing": is_typing}, broadcast=True, include_self=False)
-
-history = []
 
 @socketio.on('message')
 def handle_message(msg):
@@ -48,7 +37,14 @@ def handle_message(msg):
 def handle_history():
     emit("chat_history", history)
 
+@socketio.on('typing')
+def handle_typing(is_typing):
+    user = users.get(request.sid, "Unknown")
+    emit("typing", {"user": user, "typing": is_typing}, broadcast=True, include_self=False)
 
+@app.route('/')
+def index():
+    return "WebSocket сервер працює!"
 
 if __name__ == '__main__':
     import os

@@ -8,32 +8,75 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>  
 </head>
 <body>
-  <div class="chat-container">
-  <h1>🌸 Наш з тобою чат квітко 🌸</h1>
-  <div id="chat" class="chat-box"></div>  
-  <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
-  <button class="chat-button" onclick="sendMessage()">Надіслати</button>
-  <div id="users-online">🟢 Онлайн: </div>
-  <div id="typing-indicator" class="users-online"></div>
+  <!-- Екран входу -->
+  <div class="login-screen" id="loginScreen">
+    <h2>Вхід у чат</h2>
+    <input type="password" id="passwordInput" placeholder="Введіть пароль" />
+    <div id="nicknameSelection" style="display: none;">
+      <p>Виберіть нікнейм:</p>
+      <button onclick="chooseNickname('Baby😎')">Baby😎</button>
+      <button onclick="chooseNickname('Pink Cloud☁')">Pink Cloud☁</button>
+    </div>
+    <button onclick="checkPassword()">Увійти</button>
+    <p id="loginError" style="color:red;"></p>
   </div>
 
+  <!-- Основний чат -->
+  <div class="chat-container" id="chatContainer" style="display: none;">
+    <h1>🌸 Наш з тобою чат квітко 🌸</h1>
+    <div id="chat" class="chat-box"></div>  
+    <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
+    <button class="chat-button" onclick="sendMessage()">Надіслати</button>
+    <div id="users-online">🟢 Онлайн: </div>
+    <div id="typing-indicator" class="users-online"></div>
+  </div>
+</body>
+
+
   <script>
+    let selectedNickname = null;
+
+function checkPassword() {
+  const password = document.getElementById('passwordInput').value;
+  if (password === "26060512") {
+    document.getElementById('nicknameSelection').style.display = "block";
+    document.getElementById('loginError').textContent = "";
+  } else {
+    document.getElementById('loginError').textContent = "Неправильний пароль.";
+  }
+}
+
+
+function chooseNickname(nick) {
+  selectedNickname = nick;
+
+  // Сховати екран входу, показати чат
+  document.getElementById('loginScreen').style.display = "none";
+  document.getElementById('chatContainer').style.display = "flex";
+
+  startChat(); // Запуск сокета після вибору ніку
+}
+
+
     const chat = document.getElementById('chat');
-    const msgInput = document.getElementById('msgInput');
-    const msg = msgInput.value.trim();
+    const msgInput = document.getElementById('msgInput');   
+    let socket; 
 
-    // Правильне підключення до серверу Render
-    const socket = io("https://cloud-baby.onrender.com", {
+    function startChat() {
+    socket = io("https://cloud-baby.onrender.com", {
     transports: ["websocket"]
+  });
+
+  socket.emit("register", selectedNickname); // передаємо нік
+
+  socket.on("message", (data) => {
+  const div = document.createElement("div");
+  div.classList.add("message");
+  div.textContent = `${data.user}: ${data.text}`;
+  chat.appendChild(div);
+  scrollToBottom();
 });
 
-socket.on("message", (data) => {
-    const div = document.createElement("div");
-    div.classList.add("message"); // ✅ Додаємо клас
-    div.textContent = `${data.user}: ${data.text}`;
-    chat.appendChild(div);
-    scrollToBottom(); // ✅ Не забудь прокрутку вниз
-});
 
 socket.emit("get_history");
 
@@ -45,8 +88,7 @@ socket.on("chat_history", (messages) => {
   });
 });
 
-
-let typingTimeout;
+  let typingTimeout;
 
 msgInput.addEventListener("input", () => {
   socket.emit("typing", true);
@@ -76,8 +118,8 @@ msgInput.addEventListener("keydown", (e) => {
   }
 });
 
-function sendMessage() {
-    const msg = msgInput.value;
+function sendMessage() {    
+    const msg = msgInput.value.trim();
     if (msg) {
         socket.emit("message", msg);
         msgInput.value = "";
@@ -98,7 +140,7 @@ function scrollToBottom() {
 // викликається після додавання нового повідомлення
 scrollToBottom();
 
+}
 
   </script>
-</body>
 </html>
