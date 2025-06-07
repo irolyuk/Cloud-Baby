@@ -164,3 +164,90 @@ h1 {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
+/* === Додай цей код в кінець файлу style.css === */
+
+/* Стилі для екрану входу */
+.login-screen {
+  background-color: white;
+  border: 2px solid #ffb6c1; /* Рожева рамка, як у чата */
+  border-radius: 20px;       /* Закруглені кути */
+  padding: 30px;             /* Внутрішні відступи */
+  width: 90%;
+  max-width: 400px;          /* Можна зробити трохи вужчим за чат */
+  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.5); /* Тінь, як у чата */
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* Центрування вмісту по горизонталі */
+  text-align: center;        /* Центрування тексту для h2 та p */
+}
+
+.login-screen h2 {
+  color: #d63384;             /* Колір тексту заголовка, як у чата */
+  font-size: 1.6rem;         /* Розмір шрифту */
+  margin-top: 0;             /* Прибираємо верхній відступ, якщо є */
+  margin-bottom: 25px;       /* Відступ знизу */
+}
+
+.login-screen input[type="password"] {
+  width: 85%;                /* Ширина поля вводу */
+  padding: 12px;
+  border: 1px solid #f8cdda; /* Світло-рожева рамка */
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: #fff0f5; /* Дуже світло-рожевий фон */
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/* Загальні стилі для всіх кнопок на екрані входу */
+.login-screen button {
+  padding: 12px 25px;
+  background-color: #ff69b4; /* Основний рожевий колір кнопки */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;          /* Відступ зверху для головної кнопки "Увійти" */
+  width: 85%;                /* Ширина кнопок */
+  box-sizing: border-box;
+}
+
+.login-screen button:hover {
+  background-color: #ff1493; /* Темніший рожевий при наведенні */
+}
+
+#nicknameSelection {
+  margin-top: 15px;          /* Відступ зверху перед вибором нікнейму */
+  margin-bottom: 5px;        /* Невеликий відступ знизу перед кнопкою "Увійти" */
+  width: 100%;               /* Щоб align-items працював коректно */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#nicknameSelection p {
+  margin-bottom: 10px;
+  color: #555;               /* Колір тексту для підказки */
+  font-size: 1rem;
+}
+
+/* Специфічні налаштування для кнопок вибору нікнейму */
+#nicknameSelection button {
+  margin-top: 0;             /* Прибираємо верхній відступ, успадкований від .login-screen button */
+  margin-bottom: 10px;       /* Відступ між кнопками нікнеймів */
+}
+
+#nicknameSelection button:last-child {
+  margin-bottom: 0;          /* Прибираємо нижній відступ для останньої кнопки нікнейму */
+}
+
+#loginError {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  /* колір вже заданий inline стилем style="color:red;" в HTML, тому тут його не дублюємо */
+}
+
+/* === Кінець коду для додавання === */

@@ -11,20 +11,20 @@
 
   <!-- Екран входу -->
   <div class="login-screen" id="loginScreen">
-    <h2>Вхід у чат</h2>
+    <h2>Вхід у парадайз</h2>
     <input type="password" id="passwordInput" placeholder="Введіть пароль" />
     <div id="nicknameSelection" style="display: none;">
-      <p>Виберіть нікнейм:</p>
+      <p>Вибери свій нікнейм манюня моя:</p>
       <button onclick="chooseNickname('Baby 😎')">Baby 😎</button>
       <button onclick="chooseNickname('Pink Cloud ☁️')">Pink Cloud ☁️</button>
     </div>
-    <button onclick="checkPassword()">Увійти</button>
+    <button id="loginButton" onclick="checkPassword()">Увійти</button>
     <p id="loginError" style="color:red;"></p>
   </div>
 
   <!-- Чат -->
   <div class="chat-container" id="chatContainer" style="display: none;">
-    <h1>🌸 Наш з тобою чат квітко 🌸</h1>
+    <h1>🌸 ❤ Rakhiv Paradase ❤ 🌸</h1>
     <div id="chat" class="chat-box"></div>
     <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
     <button class="chat-button">Надіслати</button>
@@ -37,8 +37,8 @@
     let socket = null;
 
     const avatars = {
-     "Baby": "😎",
-     "Pink Cloud": "☁️"
+     "Baby 😎": "😎",
+     "Pink Cloud ☁️": "☁️"
     };
     
     const userColors = {
@@ -48,9 +48,12 @@
 
     function checkPassword() {
       const password = document.getElementById('passwordInput').value;
+      const loginButton = document.getElementById('loginButton');
       if (password === "26060512") {
         document.getElementById('nicknameSelection').style.display = "block";
-        document.getElementById('loginError').textContent = "";
+  passwordInput.style.display = "none"; // Приховуємо поле пароля
+  loginButton.style.display = "none";   // Приховуємо кнопку "Увійти"
+  document.getElementById('loginError').textContent = "";
       } else {
         document.getElementById('loginError').textContent = "Неправильний пароль.";
       }
