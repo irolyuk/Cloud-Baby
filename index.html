@@ -15,8 +15,8 @@
     <input type="password" id="passwordInput" placeholder="Введіть пароль" />
     <div id="nicknameSelection" style="display: none;">
       <p>Виберіть нікнейм:</p>
-      <button onclick="chooseNickname('Baby 😎')">Baby</button>
-      <button onclick="chooseNickname('Pink Cloud ☁️')">Pink Cloud</button>
+      <button onclick="chooseNickname('Baby 😎')">Baby 😎</button>
+      <button onclick="chooseNickname('Pink Cloud ☁️')">Pink Cloud ☁️</button>
     </div>
     <button onclick="checkPassword()">Увійти</button>
     <p id="loginError" style="color:red;"></p>
@@ -37,8 +37,8 @@
     let socket = null;
 
     const avatars = {
-     "Baby 😎": "😎",
-     "Pink Cloud ☁️": "☁️"
+     "Baby": "😎",
+     "Pink Cloud": "☁️"
     };
     
     const userColors = {
@@ -71,18 +71,18 @@
       socket.emit("register", selectedNickname); // передаємо нік
 
       socket.on("chat_history", (messages) => {
-  messages.forEach((data) => {
-    const div = document.createElement("div");
-    div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
-    div.classList.add("message");
+      messages.forEach((data) => {
+      const div = document.createElement("div");
+      div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+      div.classList.add("message");
 
-    const colorClass = userColors[data.user];
-    if (colorClass) div.classList.add(colorClass);
+      const colorClass = userColors[data.user];
+      if (colorClass) div.classList.add(colorClass);
 
-    chat.appendChild(div);
+      chat.appendChild(div);
+    });
+    scrollToBottom();
   });
-  scrollToBottom();
-});
 
 
       socket.on("message", (data) => {
