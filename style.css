@@ -1,69 +1,112 @@
+/* Загальне оформлення */
 body {
-    font-family: "Arial", sans-serif;
-    background-color: #f9f9f9;
-    text-align: center;
-    margin: 20px;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #fff0f5, #ffe4e1);
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
+/* Контейнер чату */
+.chat-container {
+  background-color: white;
+  border: 2px solid #ffb6c1;
+  border-radius: 20px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Заголовок */
 h1 {
-    color: #ff69b4;
-    font-size: 2rem;
+  text-align: center;
+  color: #d63384;
+  font-size: 1.5rem;
+  margin: 0;
 }
 
-#chat {
-    border: 2px solid #ff69b4;
-    border-radius: 10px;
-    height: 300px;
-    width: 60%;
-    margin: auto;
+/* Вікно чату */
+.chat-box {
+  background-color: #fffafc;
+  border: 1px solid #f8cdda;
+  border-radius: 10px;
+  padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  font-size: 1rem;
+}
+
+/* Повідомлення */
+.message {
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  background-color: #ffe4e1;
+  border-radius: 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+/* Введення повідомлення */
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #f8cdda;
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: #fff0f5;
+}
+
+.input-area button {
+  padding: 10px 20px;
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.input-area button:hover {
+  background-color: #ff1493;
+}
+
+/* Онлайн користувачі */
+.online-users {
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+}
+
+/* Адаптивність */
+@media (max-width: 600px) {
+  .chat-container {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .chat-box {
+    height: 250px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .input-area button {
     padding: 10px;
-    overflow-y: auto;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-}
-
-input, button {
-    font-size: 18px;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 90%;
-    max-width: 400px;
-    margin-top: 10px;
-}
-
-button {
-    background-color: #ff69b4;
-    color: white;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #d85a94;
-}
-
-/* 📱 Адаптивний дизайн для мобільних */
-@media screen and (max-width: 768px) {
-    #chat {
-        width: 90%;
-        height: 250px;
-    }
-
-    input, button {
-        font-size: 16px;
-        width: 100%;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-    }
-}
-
-/* 🏢 Адаптивний дизайн для великих екранів */
-@media screen and (min-width: 1200px) {
-    #chat {
-        width: 50%;
-        height: 400px;
-    }
+  }
 }
