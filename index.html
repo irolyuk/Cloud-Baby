@@ -11,8 +11,8 @@
   <div class="chat-container">
   <h1>Наш з тобою чат квітко</h1>
   <div id="chat" class="chat-box"></div>
-  <input type="text" id="msgInput" placeholder="Напиши повідомлення..." />
-  <button onclick="sendMessage()">Надіслати</button>
+  <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="1"></textarea>
+  <button class="chat-button" onclick="sendMessage()">Надіслати</button>
   <div id="users-online">🟢 Онлайн: </div>
   </div>
 
@@ -27,8 +27,10 @@
 
 socket.on("message", (data) => {
     const div = document.createElement("div");
+    div.classList.add("message"); // ✅ Додаємо клас
     div.textContent = `${data.user}: ${data.text}`;
     chat.appendChild(div);
+    scrollToBottom(); // ✅ Не забудь прокрутку вниз
 });
 
 function sendMessage() {

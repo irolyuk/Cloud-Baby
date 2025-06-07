@@ -46,9 +46,14 @@ h1 {
   padding: 5px 10px;
   background-color: #ffe4e1;
   border-radius: 10px;
-  max-width: 80%;
-  word-wrap: break-word;
+  max-width: 100%;               /* ✅ Повідомлення не вилазить */
+  word-break: break-word;        /* ✅ Ламає слова */
+  white-space: pre-wrap;         /* ✅ Переносить \n і довгі рядки */
+  overflow-wrap: break-word;     /* ✅ Браузерна підтримка */
+  box-sizing: border-box;
 }
+
+
 
 .input-area {
   display: flex;
@@ -97,23 +102,46 @@ h1 {
   }
 
   .chat-box {
-    font-size: 0.95rem;
-  }
-
-  h1 {
-    font-size: 1.3rem;
-  }
-}
-
-.chat-box {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;       /* 🔴 Заборонити горизонтальну прокрутку */
+  max-height: 60vh;
+  padding: 10px;
   background-color: #fffafc;
   border: 1px solid #f8cdda;
   border-radius: 10px;
-  padding: 10px;
-  flex-grow: 1;
-  overflow-y: auto;
   font-size: 1rem;
+  box-sizing: border-box;   /* ✅ Важливо для обмеження розміру */
+  word-wrap: break-word;    /* ✅ Розрив слів */
+}
 
-  /* ДОДАЙ межу висоти */
-  max-height: 60vh; /* або конкретне значення, напр. 400px */
+
+ 
+}
+
+.chat-input {
+   flex-grow: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: none; /* Заборонити ручну зміну розміру, якщо хочеш */
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+  height: 20px; /* мінімальна висота */
+  max-height: 150px; /* обмежити зростання */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  overflow-y: auto;
+}
+
+.chat-button {
+  padding: 10px 20px;
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
