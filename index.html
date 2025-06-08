@@ -325,10 +325,9 @@
       
       // Зачекати завершення анімації перед тим, як приховати елемент і відновити прокрутку
       setTimeout(() => {
-        if (!imageGalleryModal.classList.contains('show')) { // Перевірка, чи не відкрили знову
-          // Клас .hide вже має анімацію, яка закінчується opacity: 0.
-          // display: none; тепер встановлюється початково і прибирається при .show
-          // Тому тут можна просто переконатися, що клас .hide є, а .show немає.
+        // Якщо галерея все ще має клас 'hide' (тобто не була відкрита знову під час анімації)
+        if (imageGalleryModal.classList.contains('hide')) {
+          imageGalleryModal.style.display = 'none'; // Остаточно приховуємо елемент
         }
         document.body.style.overflow = 'auto'; // Відновити прокрутку фону
       }, 400); // Час має відповідати тривалості анімації fadeOutModal
