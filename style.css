@@ -428,7 +428,7 @@ h1 {
 
 .gallery-content {
   position: relative;
-  width: 100%;
+  width: 95%; /* Збільшуємо ширину контенту галереї */
   height: 90%;
   display: flex;
   align-items: center;
@@ -458,7 +458,7 @@ h1 {
 }
 
 .gallery-nav-btn {
-  background-color: rgba(255, 240, 245, 0.85); /* Дуже світлий, напівпрозорий лавандово-рожевий */
+  display: none; /* Приховуємо кнопки навігації */  background-color: rgba(255, 240, 245, 0.85); /* Дуже світлий, напівпрозорий лавандово-рожевий */
   color: #d63384; /* Основний рожевий колір для іконки, як у заголовка */
   border: 2px solid rgba(255, 105, 180, 0.5); /* Напівпрозора рожева рамка */
   border-radius: 50%;
