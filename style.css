@@ -119,6 +119,10 @@ h1 {
   margin-top: 10px;
 }
 
+.users-online {
+  text-align: center;
+}
+
 .status-messages-container {
   width: 100%; /* Займає всю доступну ширину */
   display: flex;
