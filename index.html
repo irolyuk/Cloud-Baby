@@ -46,9 +46,14 @@
     </div>
     <div class="input-controls">
       <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="1"></textarea>
+      <button id="emojiToggleBtn" class="emoji-toggle-btn">😊</button>
       <input type="file" id="imageInput" accept="image/*" style="display: none;">
       <button id="attachImageBtn" class="attach-btn">📎</button>
       <button class="chat-button">💬</button>
+
+      <div id="emojiPanel" class="emoji-panel" style="display: none;">
+        <!-- Емодзі будуть завантажені сюди за допомогою JavaScript -->
+      </div>
     </div>
     <div class="status-messages-container">
       <div id="users-online" class="users-online"></div>
@@ -400,6 +405,8 @@
     const prevImageBtn = document.getElementById('prevImageBtn');
     const nextImageBtn = document.getElementById('nextImageBtn');
     const chatDisplayModal = document.getElementById('chatImageDisplayModal');
+    const emojiToggleBtn = document.getElementById('emojiToggleBtn');
+    const emojiPanel = document.getElementById('emojiPanel');
     const chatDisplayImg = document.getElementById('chatDisplayImage');
     const closeChatImageDisplayBtn = document.getElementById('closeChatImageDisplayModalBtn');
 
@@ -482,6 +489,49 @@
     nextImageBtn.addEventListener('click', () => {
       galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
     });
+
+    // --- Панель Емодзі ---
+    const emojis = ['😀', '😂', '😊', '😍', '🤔', '😢', '😠', '👍', '👎', '❤️', '🎉', '✨', '🌸', '☁️', '😎', '🍂', '💖', '🌠', '🤗', '🌌', '😘', '😜', '😇', '🥳', '😭', '🙏', '👀', '👋', '🔥', '💯'];
+
+    function populateEmojiPanel() {
+      emojis.forEach(emoji => {
+        const emojiSpan = document.createElement('span');
+        emojiSpan.textContent = emoji;
+        emojiSpan.setAttribute('role', 'button'); // Для доступності
+        emojiSpan.setAttribute('tabindex', '0');  // Для доступності
+        emojiSpan.addEventListener('click', () => insertEmoji(emoji));
+        emojiSpan.addEventListener('keydown', (e) => { // Для доступності з клавіатури
+          if (e.key === 'Enter' || e.key === ' ') {
+            insertEmoji(emoji);
+          }
+        });
+        emojiPanel.appendChild(emojiSpan);
+      });
+    }
+
+    function insertEmoji(emoji) {
+      const msgInput = document.getElementById('msgInput');
+      const start = msgInput.selectionStart;
+      const end = msgInput.selectionEnd;
+      const text = msgInput.value;
+      msgInput.value = text.substring(0, start) + emoji + text.substring(end);
+      msgInput.focus();
+      msgInput.selectionStart = msgInput.selectionEnd = start + emoji.length;
+      // Можна автоматично ховати панель після вибору:
+      // emojiPanel.style.display = 'none';
+    }
+
+    emojiToggleBtn.addEventListener('click', (event) => {
+      event.stopPropagation(); // Зупиняємо спливання події, щоб не закрити панель одразу
+      emojiPanel.style.display = emojiPanel.style.display === 'none' ? 'grid' : 'none';
+    });
+
+    document.addEventListener('click', (event) => {
+      if (emojiPanel.style.display === 'grid' && !emojiPanel.contains(event.target) && event.target !== emojiToggleBtn) {
+        emojiPanel.style.display = 'none';
+      }
+    });
+    populateEmojiPanel(); // Заповнюємо панель емодзі при завантаженні
   </script>
 
 </body>

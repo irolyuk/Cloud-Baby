@@ -114,7 +114,7 @@ h1 {
 .online-users {
   font-size: 0.9rem;
   color: #187537;
-  width: 100%; /* Додати, якщо text-align: center не спрацьовує сам по собі */
+  width: 100%; 
   text-align: center;
   margin-top: 10px;
 }
@@ -168,8 +168,8 @@ h1 {
   display: flex; /* Встановлюємо flex-контейнер для розташування елементів в ряд */
   align-items: center; /* Вирівнюємо елементи по центру вертикально */
   gap: 10px; /* Проміжок між блоком пісень та регулятором гучності */
-  margin-top: 10px;
-  margin-bottom: 10px; /* Відступ знизу перед полем вводу */
+  margin-top: 10px; /* Відступ зверху від чат-боксу */
+  margin-bottom: 5px; /* Зменшений відступ знизу перед полем вводу */
 }
 
 .items {
@@ -287,9 +287,9 @@ h1 {
   font-size: 1rem;
   line-height: 1.4; /* Змінено для кращого вигляду в один рядок */
   height: 20px; /* мінімальна висота */
-  max-height: 150px; /* обмежити зростання */
-  margin-top: 10px;
-  margin-bottom: 10px;
+  max-height: 150px; 
+  margin-top: 5px; /* Зменшений відступ */
+  margin-bottom: 5px; /* Зменшений відступ */
   overflow-y: auto;
 }
 
@@ -297,8 +297,9 @@ h1 {
   display: flex;
   align-items: center; /* Вирівнюємо елементи по вертикалі */
   gap: 8px; /* Проміжок між елементами */
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 5px; /* Відступ зверху */
+  margin-bottom: 0px; /* Прибираємо відступ знизу, щоб наблизити до блоку статусів */
+  position: relative; /* Важливо для позиціонування панелі емодзі */
 }
 
 .chat-button {
@@ -326,6 +327,60 @@ h1 {
 }
 .attach-btn:hover {
   background-color: #ffb6c1;
+}
+
+/* Стилі для кнопки та панелі емодзі */
+.emoji-toggle-btn {
+  padding: 8px 10px;
+  background-color: #fde4f0; /* Світліший рожевий */
+  color: #d63384; /* Колір іконки, як у заголовка */
+  border: 1px solid #ffc0cb; /* Рожева рамка */
+  border-radius: 8px;
+  font-size: 1.2rem; /* Розмір іконки */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0; /* Щоб кнопка не стискалася */
+  line-height: 1; /* Для кращого вирівнювання іконки */
+}
+
+.emoji-toggle-btn:hover {
+  background-color: #ffc0cb; /* Світло-рожевий при наведенні */
+}
+
+.emoji-panel {
+  position: absolute;
+  bottom: 100%; /* Розміщуємо панель над блоком .input-controls */
+  left: 0; /* Вирівнюємо по лівому краю .input-controls */
+  width: 100%; /* Ширина панелі така ж, як .input-controls */
+  max-width: 320px; /* Обмежуємо максимальну ширину */
+  margin-bottom: 8px; /* Невеликий відступ між панеллю та полем вводу */
+  background-color: white;
+  border: 1px solid #ffb6c1; /* Рожева рамка, як у чата */
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Тінь зверху */
+  z-index: 100; /* Поверх інших елементів, але нижче модальних вікон */
+  display: grid; /* Використовуємо grid для розміщення емодзі */
+  grid-template-columns: repeat(auto-fill, minmax(35px, 1fr)); /* Адаптивні колонки */
+  gap: 8px; /* Проміжок між емодзі */
+  max-height: 150px; /* Максимальна висота панелі, з'явиться прокрутка */
+  overflow-y: auto; /* Вертикальна прокрутка при необхідності */
+  box-sizing: border-box;
+}
+
+.emoji-panel span {
+  padding: 4px;
+  font-size: 1.6rem; /* Розмір емодзі */
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.emoji-panel span:hover,
+.emoji-panel span:focus {
+  background-color: #ffe4e1; /* Світло-рожевий фон при наведенні/фокусі */
+  outline: none;
 }
 
 /* === Додай цей код в кінець файлу style.css === */
