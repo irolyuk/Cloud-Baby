@@ -51,7 +51,7 @@ h1 {
   flex-grow: 1;
   overflow-y: auto;
   font-size: 1rem;
-  max-height: 60vh;
+  max-height: 55vh;
 }
 
 .message {
@@ -106,7 +106,7 @@ h1 {
 
 .online-users {
   font-size: 0.9rem;
-  color: #555;
+  color: #187537;
   text-align: center;
   margin-top: 10px;
 }
@@ -136,6 +136,50 @@ h1 {
 
 
  
+}
+
+.items {
+  display: flex;
+  background-color: rgb(249, 227, 255);
+  border-radius: 8px;
+  border: 1px solid #ffc0f5;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  margin-top: 10px;
+  overflow-x: auto;       /* Горизонтальна прокрутка при необхідності */
+  overflow-y: hidden;     /* Запобігання вертикальній прокрутці */
+  gap: 10%;
+  padding: 10px;
+}
+
+.item-btn {
+  display: flex;
+  flex-shrink: 0;
+  background-color: #ffe4e1; /* Світло-рожевий фон, як у повідомлень */
+  border: 1px solid #ffb6c1; /* Рожева рамка */
+  color: #11460f; /* Колір іконки, як у заголовка H1 */
+  border-radius: 8px; /* Закруглені кути */
+  padding: 6px 10px; /* Внутрішні відступи кнопки */  
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  display: inline-flex; /* Для кращого вирівнювання іконки */
+  align-items: center;
+  justify-content: center;
+  line-height: 1; /* Прибирає зайву висоту рядка від шрифту */
+  min-height: 36px; /* Мінімальна висота кнопки */
+}
+
+.item-btn:hover {
+  background-color: #ffb6c1; /* Світло-рожевий фон при наведенні */
+  transform: scale(1.05); /* Збільшення кнопки при наведенні */
+}
+
+.item-btn.playing {
+  background-color: #ff69b4; /* Колір активної кнопки (як кнопка "Надіслати") */
+  color: white;
+  border-color: #ff1493; /* Темніша рамка для активної кнопки */
 }
 
 .chat-input {

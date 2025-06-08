@@ -26,6 +26,13 @@
   <div class="chat-container" id="chatContainer" style="display: none;">
     <h1>🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
     <div id="chat" class="chat-box"></div>
+    <div class="items">
+        <button class="item-btn" onclick="playMusic('audio/Autumn love.m4a1', this)">🍂Осінь🍂</button>
+        <button class="item-btn" onclick="playMusic('audio/song2.mp3', this)">🎶</button>
+        <button class="item-btn" onclick="playMusic('audio/song3.mp3', this)">🎼</button>
+        <button class="item-btn" onclick="playMusic('audio/song4.mp3', this)">🎸</button>
+        <button class="item-btn" onclick="playMusic('audio/song5.mp3', this)">🎹</button>  
+    </div>
     <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
     <button class="chat-button">Надіслати</button>
     <div id="users-online">🟢 Онлайн: </div>
@@ -35,6 +42,10 @@
   <script>
     let selectedNickname = null;
     let socket = null;
+    // Оголошуємо плеєр та пов'язані змінні тут, щоб вони були глобально доступні в межах скрипта
+    const musicPlayer = new Audio();
+    let currentPlayingButton = null;
+    let currentSongSrc = null;
 
     const avatars = {
      "Baby 😎": "😎",
@@ -150,6 +161,52 @@
       const chatBox = document.getElementById("chat");
       chatBox.scrollTop = chatBox.scrollHeight;
     }
+
+
+        function playMusic(songSrc, buttonElement) {
+      if (musicPlayer.src.includes(songSrc) && !musicPlayer.paused) {
+        // Та сама пісня грає, ставимо на паузу
+        musicPlayer.pause();
+        buttonElement.classList.remove('playing');
+        currentPlayingButton = null;
+      } else if (musicPlayer.src.includes(songSrc) && musicPlayer.paused) {
+        // Та сама пісня на паузі, продовжуємо відтворення
+        musicPlayer.play()
+          .then(() => {
+            if (currentPlayingButton && currentPlayingButton !== buttonElement) {
+              currentPlayingButton.classList.remove('playing');
+            }
+            buttonElement.classList.add('playing');
+            currentPlayingButton = buttonElement;
+          })
+          .catch(error => console.error("Помилка продовження аудіо:", error));
+      } else {
+        // Нова пісня або інша вибрана
+        if (currentPlayingButton) {
+          currentPlayingButton.classList.remove('playing');
+        }
+        
+        musicPlayer.src = songSrc;
+        currentSongSrc = songSrc;
+        musicPlayer.play()
+          .then(() => {
+            buttonElement.classList.add('playing');
+            currentPlayingButton = buttonElement;
+          })
+          .catch(error => {
+            console.error("Помилка відтворення нового аудіо:", error);
+            currentSongSrc = null;
+          });
+      }
+    }
+
+    musicPlayer.onended = function() {
+      if (currentPlayingButton) {
+        currentPlayingButton.classList.remove('playing');
+        currentPlayingButton = null;
+      }
+      currentSongSrc = null;
+    };
   </script>
 
 </body>
