@@ -112,20 +112,6 @@
 
       socket.emit("register", selectedNickname); // передаємо нік
 
-      socket.on("chat_history", (messages) => {
-      messages.forEach((data) => {
-      const div = document.createElement("div");
-      div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
-      div.classList.add("message");
-
-      const colorClass = userColors[data.user];
-      if (colorClass) div.classList.add(colorClass);
-
-      chat.appendChild(div);
-    });
-    scrollToBottom();
-  });
-
 
       socket.on("message", (data) => {
         const messageDiv = document.createElement("div");
