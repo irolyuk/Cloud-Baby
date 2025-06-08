@@ -25,6 +25,7 @@
   <!-- Чат -->
   <div class="chat-container" id="chatContainer" style="display: none;">
     <h1>🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
+    <button id="openGalleryBtn" class="gallery-toggle-btn">🖼️</button>
     <div id="chat" class="chat-box"></div>
     <div class="media-controls-area">
       <div class="items">
@@ -49,6 +50,17 @@
     <div id="typing-indicator" class="users-online"></div>
   </div>
 
+  <!-- Модальне вікно галереї -->
+  <div id="imageGalleryModal" class="gallery-modal" style="display: none;">
+    <button id="closeGalleryBtn" class="gallery-close-btn">&times;</button>
+    <div class="gallery-content">
+      <button id="prevImageBtn" class="gallery-nav-btn prev-btn" aria-label="Previous image">&lt;</button>
+      <div class="gallery-images-container" id="galleryImagesContainer">
+        <!-- Зображення будуть завантажені сюди за допомогою JavaScript -->
+      </div>
+      <button id="nextImageBtn" class="gallery-nav-btn next-btn" aria-label="Next image">&gt;</button>
+    </div>
+  </div>
   <script>
     let selectedNickname = null;
     let socket = null;
@@ -262,6 +274,60 @@
     //     volumeSlider.style.display = 'none';
     //   }
     // });
+
+    // --- Галерея зображень ---
+    const openGalleryBtn = document.getElementById('openGalleryBtn');
+    const closeGalleryBtn = document.getElementById('closeGalleryBtn');
+    const imageGalleryModal = document.getElementById('imageGalleryModal');
+    const galleryImagesContainer = document.getElementById('galleryImagesContainer');
+    const prevImageBtn = document.getElementById('prevImageBtn');
+    const nextImageBtn = document.getElementById('nextImageBtn');
+
+    // ЗАМІНИ ЦІ ШЛЯХИ НА СВОЇ ЗОБРАЖЕННЯ В ПАПЦІ 'img'
+    const galleryImageSources = [
+      'img/1.jpg',
+      'img/2.jpg',
+      'img/3.jpg',
+      'img/4.jpg',
+      'img/5.jpg',
+      'img/6.jpg',
+      'img/7.jpg',
+      'img/8.jpg',
+      'img/9.jpg',
+      // Додай більше шляхів до зображень тут
+    ];
+    let imagesInGalleryLoaded = false;
+
+    function populateGallery() {
+      if (imagesInGalleryLoaded) return;
+      galleryImagesContainer.innerHTML = ''; // Очистити попередні, якщо є
+      galleryImageSources.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = "Зображення з галереї";
+        galleryImagesContainer.appendChild(img);
+      });
+      imagesInGalleryLoaded = true;
+    }
+
+    openGalleryBtn.addEventListener('click', () => {
+      populateGallery();
+      imageGalleryModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Запобігти прокрутці фону
+    });
+
+    closeGalleryBtn.addEventListener('click', () => {
+      imageGalleryModal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Відновити прокрутку фону
+    });
+
+    prevImageBtn.addEventListener('click', () => {
+      galleryImagesContainer.scrollBy({ left: -galleryImagesContainer.clientWidth, behavior: 'smooth' });
+    });
+
+    nextImageBtn.addEventListener('click', () => {
+      galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
+    });
   </script>
 
 </body>

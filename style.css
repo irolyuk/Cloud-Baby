@@ -12,6 +12,7 @@ body {
 
 
 .chat-container {
+  position: relative; /* Для позиціонування кнопки галереї */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -364,3 +365,128 @@ h1 {
 }
 
 /* === Кінець коду для додавання === */
+
+/* === Стилі для галереї зображень === */
+.gallery-toggle-btn {
+  position: absolute;
+  top: 15px; /* Відступ зверху */
+  right: 15px; /* Відступ справа */
+  background-color: #ffc0f5; /* Світло-рожевий, як фон .items */
+  border: 1px solid #ffb6c1; /* Рожева рамка */
+  color: #d63384; /* Колір іконки, як заголовок */
+  border-radius: 50%; /* Кругла кнопка */
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem; /* Розмір іконки */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10; /* Щоб була поверх інших елементів чату */
+  padding: 0;
+  line-height: 1;
+}
+
+.gallery-toggle-btn:hover {
+  background-color: #ffb6c1;
+  transform: scale(1.1);
+}
+
+.gallery-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 228, 225, 0.9); /* Напівпрозорий рожевий фон */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Поверх усього */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.gallery-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: #ff69b4;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 2rem;
+  line-height: 36px; /* Для центрування хрестика */
+  text-align: center;
+  cursor: pointer;
+  z-index: 1002;
+  padding: 0;
+}
+
+.gallery-content {
+  position: relative;
+  width: 100%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Розміщує кнопки по боках */
+}
+
+.gallery-images-container {
+  display: flex;
+  overflow-x: auto; /* Горизонтальна прокрутка */
+  scroll-snap-type: x mandatory; /* Плавне прилипання до зображень при скролі */
+  -webkit-overflow-scrolling: touch; /* Плавний скрол на iOS */
+  width: 100%; /* Контейнер займає всю доступну ширину */
+  height: 100%; /* Контейнер займає всю доступну висоту */
+  align-items: center; /* Вертикальне центрування зображень */
+  /* gap: 20px; - Прибираємо, щоб зображення займали всю ширину */
+  /* padding: 0 10px; - Прибираємо, щоб не було зайвих відступів */
+}
+
+.gallery-images-container img {
+  width: 100%; /* Кожне зображення займає 100% ширини контейнера */
+  height: 100%; /* Кожне зображення займає 100% висоти контейнера */
+  object-fit: cover; /* Зберігає пропорції, заповнюючи контейнер та обрізаючи зайве */
+  scroll-snap-align: center; /* Центрує зображення при "прилипанні" */
+  border-radius: 10px; /* Закруглені кути для зображень */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Тінь для зображень */
+  flex-shrink: 0; /* Запобігає стисканню зображень, якщо їх багато */
+}
+
+.gallery-nav-btn {
+  background-color: rgba(255, 240, 245, 0.85); /* Дуже світлий, напівпрозорий лавандово-рожевий */
+  color: #d63384; /* Основний рожевий колір для іконки, як у заголовка */
+  border: 2px solid rgba(255, 105, 180, 0.5); /* Напівпрозора рожева рамка */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.8rem; /* Трохи зменшимо розмір стрілок для витонченості */
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 10px; /* Відступи від країв екрану/контейнера зображень */
+  box-shadow: 0 2px 5px rgba(214, 51, 132, 0.15); /* Легка, м'яка тінь */
+}
+
+.gallery-nav-btn:hover {
+  background-color: rgba(255, 228, 225, 0.95); /* Світліший, майже непрозорий рожевий (MistyRose) */
+  border-color: #ff69b4; /* Яскравіша рожева рамка */
+  transform: scale(1.05); /* Невелике збільшення */
+  box-shadow: 0 4px 8px rgba(214, 51, 132, 0.25); /* Більш виразна тінь */
+}
+
+.prev-btn {
+  /* Можна додати специфічні стилі, якщо потрібно */
+}
+
+.next-btn {
+  /* Можна додати специфічні стилі, якщо потрібно */
+}
