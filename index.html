@@ -57,6 +57,14 @@
     </div>
   </div>
 
+  <!-- Модальне вікно для зображень з чату -->
+  <div id="chatImageDisplayModal" class="gallery-modal" style="display: none;">
+    <button id="closeChatImageDisplayModalBtn" class="gallery-close-btn">&times;</button>
+    <div class="gallery-content">
+      <img id="chatDisplayImage" src="" alt="Збільшене зображення з чату" style="max-width: 90vw; max-height: 90vh; object-fit: contain;" />
+    </div>
+  </div>
+
   <!-- Модальне вікно галереї -->
   <div id="imageGalleryModal" class="gallery-modal" style="display: none;">
     <button id="closeGalleryBtn" class="gallery-close-btn">&times;</button>
@@ -126,7 +134,7 @@
           img.src = data.image;
           img.alt = "Зображення від " + data.user;
           img.classList.add('chat-image-thumbnail');
-          img.onclick = () => openImageInModal(data.image);
+          img.onclick = () => displayChatImageFull(data.image);
           
           const senderInfo = document.createElement('span');
           senderInfo.textContent = `${avatars[data.user] || "👤"} ${data.user}: `;
@@ -240,7 +248,7 @@
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
 
-              // Отримуємо стиснене зображення як JPEG з якістю 0.7 (можна змінювати)
+              // Отримуємо стиснене зображення як JPEG з якістю 0.9 (можна змінювати)
               const compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.9); 
 
               socket.emit("message", { type: 'image', image: compressedImageDataUrl }, () => {
@@ -270,7 +278,7 @@
         img.src = data.image;
         img.alt = "Зображення від " + data.user;
         img.classList.add('chat-image-thumbnail');
-        img.onclick = () => openImageInModal(data.image);
+        img.onclick = () => displayChatImageFull(data.image);
         messageDiv.appendChild(document.createTextNode(`${avatars[data.user] || "👤"} ${data.user}: `));
         messageDiv.appendChild(img);
       } else {
@@ -391,6 +399,30 @@
     const galleryImagesContainer = document.getElementById('galleryImagesContainer');
     const prevImageBtn = document.getElementById('prevImageBtn');
     const nextImageBtn = document.getElementById('nextImageBtn');
+    const chatDisplayModal = document.getElementById('chatImageDisplayModal');
+    const chatDisplayImg = document.getElementById('chatDisplayImage');
+    const closeChatImageDisplayBtn = document.getElementById('closeChatImageDisplayModalBtn');
+
+    function displayChatImageFull(imageSrc) {
+      chatDisplayImg.src = imageSrc;
+      chatDisplayModal.style.display = 'flex';
+      chatDisplayModal.classList.remove('hide');
+      chatDisplayModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    if (closeChatImageDisplayBtn) {
+      closeChatImageDisplayBtn.addEventListener('click', () => {
+        chatDisplayModal.classList.remove('show');
+        chatDisplayModal.classList.add('hide');
+        setTimeout(() => {
+          if (chatDisplayModal.classList.contains('hide')) {
+            chatDisplayModal.style.display = 'none';
+          }
+          document.body.style.overflow = 'auto';
+        }, 400); // Час має відповідати тривалості CSS анімації
+      });
+    }
 
     // ЗАМІНИ ЦІ ШЛЯХИ НА СВОЇ ЗОБРАЖЕННЯ В ПАПЦІ 'img'
     const galleryImageSources = [
@@ -450,25 +482,6 @@
     nextImageBtn.addEventListener('click', () => {
       galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
     });
-  </script>
-  <script>
-    // Функція для відкриття зображення в модальному вікні (можна розширити існуючу галерею)
-    function openImageInModal(imageSrc) {
-      // Простий варіант: використовуємо існуючу галерею, показуючи лише одне зображення
-      // Або можна створити окреме модальне вікно для одного зображення
-      const galleryModal = document.getElementById('imageGalleryModal');
-      const galleryContainer = document.getElementById('galleryImagesContainer');
-      
-      galleryContainer.innerHTML = ''; // Очищаємо попередні зображення
-      const img = document.createElement('img');
-      img.src = imageSrc;
-      img.alt = "Збільшене зображення";
-      galleryContainer.appendChild(img);
-      
-      galleryModal.classList.remove('hide');
-      galleryModal.classList.add('show');
-      document.body.style.overflow = 'hidden';
-    }
   </script>
 
 </body>
