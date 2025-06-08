@@ -26,12 +26,18 @@
   <div class="chat-container" id="chatContainer" style="display: none;">
     <h1>🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
     <div id="chat" class="chat-box"></div>
-    <div class="items">
-        <button class="item-btn" onclick="playMusic('audio/Autumn-love.m4a', this)">🍂Осінь🍂</button>
-        <button class="item-btn" onclick="playMusic('audio/song2.mp3', this)">🎶</button>
-        <button class="item-btn" onclick="playMusic('audio/song3.mp3', this)">🎼</button>
-        <button class="item-btn" onclick="playMusic('audio/song4.mp3', this)">🎸</button>
-        <button class="item-btn" onclick="playMusic('audio/song5.mp3', this)">🎹</button>  
+    <div class="media-controls-area">
+      <div class="items">
+          <button class="item-btn" onclick="playMusic('audio/Autumn-love.m4a', this)">🍂Осінь🍂</button>
+          <button class="item-btn" onclick="playMusic('audio/song2.mp3', this)">🎶</button>
+          <button class="item-btn" onclick="playMusic('audio/song3.mp3', this)">🎼</button>
+          <button class="item-btn" onclick="playMusic('audio/song4.mp3', this)">🎸</button>
+          <button class="item-btn" onclick="playMusic('audio/song5.mp3', this)">🎹</button>
+      </div>
+      <div class="volume-control">
+        <button id="volumeToggleButton" class="item-btn">🔊</button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" style="display: none;">
+      </div>
     </div>
     <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
     <button class="chat-button">Надіслати</button>
@@ -162,7 +168,6 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-
         function playMusic(songSrc, buttonElement) {
       if (musicPlayer.src.includes(songSrc) && !musicPlayer.paused) {
         // Та сама пісня грає, ставимо на паузу
@@ -207,6 +212,52 @@
       }
       currentSongSrc = null;
     };
+
+    // --- Керування гучністю ---
+    const volumeToggleButton = document.getElementById('volumeToggleButton');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    function updateVolumeIcon(volume) {
+      if (volume === 0) {
+        volumeToggleButton.textContent = '🔇';
+      } else if (volume <= 0.33) {
+        volumeToggleButton.textContent = '🔈';
+      } else if (volume <= 0.66) {
+        volumeToggleButton.textContent = '🔉';
+      } else {
+        volumeToggleButton.textContent = '🔊';
+      }
+    }
+
+    // Ініціалізація гучності
+    let initialVolume = parseFloat(localStorage.getItem('playerVolume'));
+    if (isNaN(initialVolume) || initialVolume < 0 || initialVolume > 1) {
+      initialVolume = 0.5; // Гучність за замовчуванням
+    }
+    musicPlayer.volume = initialVolume;
+    volumeSlider.value = initialVolume;
+    updateVolumeIcon(initialVolume);
+
+    volumeToggleButton.addEventListener('click', () => {
+      if (volumeSlider.style.display === 'none') {
+        volumeSlider.style.display = 'inline-block'; // Або 'block' чи 'flex' залежно від бажаного вигляду
+      } else {
+        volumeSlider.style.display = 'none';
+      }
+    });
+
+    volumeSlider.addEventListener('input', function() {
+      musicPlayer.volume = this.value;
+      updateVolumeIcon(parseFloat(this.value));
+      localStorage.setItem('playerVolume', this.value);
+    });
+
+    // Закривати слайдер гучності, якщо клікнути деінде (опціонально)
+    // document.addEventListener('click', function(event) {
+    //   if (!volumeControl.contains(event.target) && volumeSlider.style.display !== 'none') {
+    //     volumeSlider.style.display = 'none';
+    //   }
+    // });
   </script>
 
 </body>

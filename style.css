@@ -138,6 +138,14 @@ h1 {
  
 }
 
+.media-controls-area {
+  display: flex; /* Встановлюємо flex-контейнер для розташування елементів в ряд */
+  align-items: center; /* Вирівнюємо елементи по центру вертикально */
+  gap: 10px; /* Проміжок між блоком пісень та регулятором гучності */
+  margin-top: 10px;
+  margin-bottom: 10px; /* Відступ знизу перед полем вводу */
+}
+
 .items {
   display: flex;
   background-color: rgb(249, 227, 255);
@@ -145,13 +153,15 @@ h1 {
   border: 1px solid #ffc0f5;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  height: 30px;
-  margin-top: 10px;
+  justify-content: flex-start;
+  height: 50px;
   overflow-x: auto;       /* Горизонтальна прокрутка при необхідності */
   overflow-y: hidden;     /* Запобігання вертикальній прокрутці */
-  gap: 10%;
+  gap: 8px;
   padding: 10px;
+  box-sizing: border-box; /* Включаємо padding та border в розрахунок розмірів */
+  flex-grow: 1;           /* Дозволяє блоку .items зайняти доступний вільний простір */
+  min-width: 0;           /* Важливо для flex-елементів з overflow, дозволяє стискатися */
 }
 
 .item-btn {
@@ -180,6 +190,65 @@ h1 {
   background-color: #ff69b4; /* Колір активної кнопки (як кнопка "Надіслати") */
   color: white;
   border-color: #ff1493; /* Темніша рамка для активної кнопки */
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* Забороняє цьому блоку стискатися, гарантуючи його відображення */
+}
+
+/* Стилі для повзунка гучності */
+.volume-slider {
+  -webkit-appearance: none; /* Скидаємо стандартний вигляд для WebKit */
+  appearance: none;         /* Скидаємо стандартний вигляд для інших браузерів */
+  width: 100px; /* Ширина повзунка гучності */
+  margin-left: 8px; /* Відступ від кнопки-іконки */
+  height: 20px; /* Загальна висота контейнера повзунка, для вирівнювання */
+  vertical-align: middle;
+  background: transparent; /* Робимо фон контейнера прозорим */
+  cursor: pointer;
+}
+
+/* Стилізація доріжки (треку) для WebKit (Chrome, Safari, Edge) */
+.volume-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  background: #ffe4e1; /* Світло-рожевий фон, як у повідомлень або кнопок */
+  border: 1px solid #ffc0f5; /* Рожева рамка, як у .items */
+  border-radius: 10px; /* Закруглені кути, як у багатьох елементів */
+}
+
+/* Стилізація бігунка (повзунка) для WebKit */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -5px; /* (Висота бігунка - висота доріжки) / 2 + товщина рамки доріжки, якщо вона є зверху */
+  width: 18px;
+  height: 18px;
+  background: #ff69b4; /* Основний рожевий колір, як у активних кнопок */
+  border-radius: 50%; /* Робимо бігунок круглим */
+  border: 2px solid white; /* Біла обводка для контрасту */
+  box-shadow: 0 0 2px rgba(0,0,0,0.2); /* Легка тінь */
+}
+
+/* Стилізація доріжки для Firefox */
+.volume-slider::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  background: #ffe4e1;
+  border: 1px solid #ffc0f5;
+  border-radius: 10px;
+}
+
+/* Стилізація бігунка для Firefox */
+.volume-slider::-moz-range-thumb {
+  width: 14px; /* Трохи менший, бо Firefox може додавати свою рамку */
+  height: 14px;
+  background: #ff69b4;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
 }
 
 .chat-input {
