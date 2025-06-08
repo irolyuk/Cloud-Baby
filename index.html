@@ -241,7 +241,7 @@
               ctx.drawImage(img, 0, 0, width, height);
 
               // Отримуємо стиснене зображення як JPEG з якістю 0.7 (можна змінювати)
-              const compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+              const compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.9); 
 
               socket.emit("message", { type: 'image', image: compressedImageDataUrl }, () => {
                 uploadIndicator.style.display = 'none';
