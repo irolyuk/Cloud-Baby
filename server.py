@@ -26,12 +26,21 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(msg):
+    # Тепер 'msg' - це об'єкт: { type: 'text'/'image', text: '...', image: '...' }
     user = users.get(request.sid, "Unknown")
-    message_data = {"user": user, "text": msg}
+    
+    # Створюємо об'єкт повідомлення для збереження та відправки
+    message_data = {
+        "user": user,
+        "type": msg.get('type', 'text'), # Тип повідомлення, за замовчуванням 'text'
+        "text": msg.get('text'),         # Текст, буде None для зображень
+        "image": msg.get('image')        # Дані зображення, будуть None для тексту
+    }
+    
     history.append(message_data)
     if len(history) > 50:
         history.pop(0)
-    send(message_data, broadcast=True)
+    emit('message', message_data, broadcast=True) # Використовуємо emit з подією 'message'
 
 @socketio.on('get_history')
 def handle_history():

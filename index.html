@@ -44,8 +44,12 @@
         <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" style="display: none;">
       </div>
     </div>
-    <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
-    <button class="chat-button">Надіслати</button>
+    <div class="input-controls">
+      <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="1"></textarea>
+      <input type="file" id="imageInput" accept="image/*" style="display: none;">
+      <button id="attachImageBtn" class="attach-btn">📎</button>
+      <button class="chat-button">Надіслати</button>
+    </div>
     <div class="status-messages-container">
       <div id="users-online" class="users-online"></div>
       <div id="typing-indicator" class="users-online"></div>
@@ -124,17 +128,36 @@
 
 
       socket.on("message", (data) => {
-  const div = document.createElement("div");
-  div.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
-  div.classList.add("message");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message");
 
-  // Додай кольоровий клас
-  const colorClass = userColors[data.user];
-  if (colorClass) div.classList.add(colorClass);
+        const colorClass = userColors[data.user];
+        if (colorClass) messageDiv.classList.add(colorClass);
 
-  chat.appendChild(div);
-  scrollToBottom();
-});
+        if (data.type === 'image' && data.image) {
+          const img = document.createElement('img');
+          img.src = data.image;
+          img.alt = "Зображення від " + data.user;
+          img.classList.add('chat-image-thumbnail');
+          img.onclick = () => openImageInModal(data.image);
+          
+          const senderInfo = document.createElement('span');
+          senderInfo.textContent = `${avatars[data.user] || "👤"} ${data.user}: `;
+          senderInfo.classList.add('message-sender');
+          
+          messageDiv.appendChild(senderInfo);
+          messageDiv.appendChild(img);
+        } else {
+          messageDiv.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+        }
+
+        chat.appendChild(messageDiv);
+        scrollToBottom();
+      });
+      socket.on("chat_history", (messages) => { // Оновлено для обробки зображень в історії
+        messages.forEach(renderMessage); // Використовуємо нову функцію renderMessage
+        scrollToBottom();
+      });
 
       socket.on("users_online", (users) => {
         const usersOnlineDiv = document.getElementById('users-online');
@@ -189,14 +212,56 @@
         }
       });
 
-      document.querySelector(".chat-button").addEventListener("click", sendMessage);
+      document.querySelector(".chat-button").addEventListener("click", () => sendMessage());
+      
+      const attachImageBtn = document.getElementById('attachImageBtn');
+      const imageInput = document.getElementById('imageInput');
+
+      attachImageBtn.addEventListener('click', () => {
+        imageInput.click(); // Відкрити діалог вибору файлу
+      });
+
+      imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const imageDataUrl = e.target.result;
+            // Відправляємо зображення на сервер
+            socket.emit("message", { type: 'image', image: imageDataUrl });
+          }
+          reader.readAsDataURL(file);
+          imageInput.value = ''; // Скидаємо значення інпуту, щоб можна було вибрати той самий файл знову
+        }
+      });
+    }
+
+    // Функція для рендерингу повідомлення (текст або зображення)
+    function renderMessage(data) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message");
+      const colorClass = userColors[data.user];
+      if (colorClass) messageDiv.classList.add(colorClass);
+
+      if (data.type === 'image' && data.image) {
+        const img = document.createElement('img');
+        img.src = data.image;
+        img.alt = "Зображення від " + data.user;
+        img.classList.add('chat-image-thumbnail');
+        img.onclick = () => openImageInModal(data.image);
+        messageDiv.appendChild(document.createTextNode(`${avatars[data.user] || "👤"} ${data.user}: `));
+        messageDiv.appendChild(img);
+      } else {
+        messageDiv.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+      }
+      chat.appendChild(messageDiv);
     }
 
     function sendMessage() {
       const msgInput = document.getElementById("msgInput");
       const msg = msgInput.value.trim();
       if (msg && socket) {
-        socket.emit("message", msg);
+        socket.emit("message", { type: 'text', text: msg }); // Тепер відправляємо об'єкт
         msgInput.value = "";
       }
     }
@@ -363,6 +428,25 @@
     nextImageBtn.addEventListener('click', () => {
       galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
     });
+  </script>
+  <script>
+    // Функція для відкриття зображення в модальному вікні (можна розширити існуючу галерею)
+    function openImageInModal(imageSrc) {
+      // Простий варіант: використовуємо існуючу галерею, показуючи лише одне зображення
+      // Або можна створити окреме модальне вікно для одного зображення
+      const galleryModal = document.getElementById('imageGalleryModal');
+      const galleryContainer = document.getElementById('galleryImagesContainer');
+      
+      galleryContainer.innerHTML = ''; // Очищаємо попередні зображення
+      const img = document.createElement('img');
+      img.src = imageSrc;
+      img.alt = "Збільшене зображення";
+      galleryContainer.appendChild(img);
+      
+      galleryModal.classList.remove('hide');
+      galleryModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
   </script>
 
 </body>

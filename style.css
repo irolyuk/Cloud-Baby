@@ -277,12 +277,20 @@ h1 {
   resize: none; /* Заборонити ручну зміну розміру, якщо хочеш */
   font-family: inherit;
   font-size: 1rem;
-  line-height: 1.4;
+  line-height: 1.4; /* Змінено для кращого вигляду в один рядок */
   height: 20px; /* мінімальна висота */
   max-height: 150px; /* обмежити зростання */
   margin-top: 10px;
   margin-bottom: 10px;
   overflow-y: auto;
+}
+
+.input-controls {
+  display: flex;
+  align-items: center; /* Вирівнюємо елементи по вертикалі */
+  gap: 8px; /* Проміжок між елементами */
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .chat-button {
@@ -294,6 +302,22 @@ h1 {
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  flex-shrink: 0; /* Щоб кнопка не стискалася */
+}
+
+.attach-btn {
+  padding: 8px 12px; /* Трохи менші відступи */
+  background-color: #ffc0f5; /* Світліший колір */
+  color: #d63384; /* Колір іконки */
+  border: 1px solid #ffb6c1;
+  border-radius: 8px;
+  font-size: 1.2rem; /* Розмір іконки */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+}
+.attach-btn:hover {
+  background-color: #ffb6c1;
 }
 
 /* === Додай цей код в кінець файлу style.css === */
@@ -582,4 +606,20 @@ h1 {
 @keyframes flash {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.2; }
+}
+
+.chat-image-thumbnail {
+  max-width: 150px; /* Максимальна ширина мініатюри */
+  max-height: 150px; /* Максимальна висота мініатюри */
+  border-radius: 8px;
+  border: 1px solid #f8cdda;
+  margin-top: 5px; /* Відступ від тексту повідомлення, якщо є */
+  cursor: pointer;
+  object-fit: cover; /* Щоб зображення заповнювало мініатюру, зберігаючи пропорції */
+}
+
+.message-sender {
+  display: block; /* Щоб ім'я відправника було на окремому рядку перед зображенням */
+  margin-bottom: 4px;
+  font-weight: bold; /* Можна додати, якщо потрібно виділити */
 }
