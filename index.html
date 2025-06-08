@@ -46,8 +46,10 @@
     </div>
     <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="4"></textarea>
     <button class="chat-button">Надіслати</button>
-    <div id="users-online">🟢 Онлайн: </div>
-    <div id="typing-indicator" class="users-online"></div>
+    <div class="status-messages-container">
+      <div id="users-online" class="users-online"></div>
+      <div id="typing-indicator" class="users-online"></div>
+    </div>
   </div>
 
   <!-- Модальне вікно галереї -->
@@ -135,7 +137,27 @@
 });
 
       socket.on("users_online", (users) => {
-        document.getElementById('users-online').textContent = "🟢 Онлайн: " + users.join(", ");
+        const usersOnlineDiv = document.getElementById('users-online');
+        let displayString = "";
+
+        const hasBaby = users.includes("Baby 😎");
+        const hasCloud = users.includes("Pink Cloud ☁️");
+
+        if (hasBaby && hasCloud) {
+          displayString = `
+            <div class="finger-lightning-container">
+              <div class="finger left">👉</div>
+              <div class="lightning"></div>
+              <div class="finger right">👈</div>
+            </div>
+          `;
+        } else if (hasBaby) {
+          displayString = `<div class="finger-lightning-container"><div>👉</div></div>`;
+        } else if (hasCloud) {
+          displayString = `<div class="finger-lightning-container"><div>👈</div></div>`;
+        }
+        
+        usersOnlineDiv.innerHTML = displayString || "Нікого немає в мережі";
       });
 
       socket.on("typing", (data) => {

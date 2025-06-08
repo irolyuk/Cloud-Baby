@@ -35,16 +35,24 @@ h1 {
 }
 
 .message-baby {
-  color: #020327; /* cиній */
+  background-color: #b5c8fd !important; /* світло-рожевий, додамо !important для перекриття */
+  color: #031e58; /* cиній */
   font-weight: bold;
+  align-self: flex-end; /* Baby повідомлення справа */
+  border-top-left-radius: 0;
 }
 .message-cloud {
-  color: #f48fb1; /* блакитний */
+  background-color: rgb(248, 228, 241) !important; /* блакитний, додамо !important для перекриття */
+  align-self: flex-start; /* Cloud повідомлення зліва */
+  border-top-right-radius: 0;
+  color: #ff75a3; 
   font-weight: bold;
 }
 
 
 .chat-box {
+  display: flex;
+  flex-direction: column;
   background-color: #fffafc;
   border: 1px solid #f8cdda;
   border-radius: 10px;
@@ -56,24 +64,22 @@ h1 {
 }
 
 .message {
-  margin-bottom: 8px;
-  padding: 5px 10px;
-  background-color: #ffe4e1;
-  border-radius: 10px;
-  max-width: 100%;               /* ✅ Повідомлення не вилазить */
+  margin: 5px;
+  padding: 10px 15px; 
+  /* background-color: #f0f0f0;  Прибираємо загальний фон, щоб не конфліктував */
+  border-radius: 15px;
+  max-width: 70%;               /* ✅ Повідомлення не вилазить */
   word-break: break-word;        /* ✅ Ламає слова */
   white-space: pre-wrap;         /* ✅ Переносить \n і довгі рядки */
   overflow-wrap: break-word;     /* ✅ Браузерна підтримка */
   box-sizing: border-box;
+  font-size: 1rem; /* Зменшуємо розмір шрифту для кращого вигляду */
   animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(10px);}
   to {opacity: 1; transform: translateY(0);}
 }
-
-
-
 
 .input-area {
   display: flex;
@@ -108,10 +114,17 @@ h1 {
 .online-users {
   font-size: 0.9rem;
   color: #187537;
+  width: 100%; /* Додати, якщо text-align: center не спрацьовує сам по собі */
   text-align: center;
   margin-top: 10px;
 }
 
+.status-messages-container {
+  width: 100%; /* Займає всю доступну ширину */
+  display: flex;
+  flex-direction: column; /* Елементи всередині йдуть один під одним */
+  align-items: center; /* Центрує дочірні елементи по горизонталі */
+}
 /* Адаптивність */
 @media (max-width: 600px) {
   .chat-container {
@@ -520,10 +533,49 @@ h1 {
   box-shadow: 0 4px 8px rgba(214, 51, 132, 0.25); /* Більш виразна тінь */
 }
 
-.prev-btn {
-  /* Можна додати специфічні стилі, якщо потрібно */
+.finger-lightning-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px; /* Зменшуємо проміжок, щоб пальці могли бути ближче */
+  position: relative;
+  font-size: 2rem;
+  margin-top: 10px;
 }
 
-.next-btn {
-  /* Можна додати специфічні стилі, якщо потрібно */
+.finger {
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out; /* Плавніший рух */
+}
+
+.finger.left {
+  animation-name: moveRight;
+}
+
+.finger.right {
+  animation-name: moveLeft;
+}
+
+@keyframes moveRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(20px); } /* Збільшуємо зміщення для лівого пальця */
+}
+
+@keyframes moveLeft {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-20px); } /* Збільшуємо зміщення для правого пальця */
+}
+
+.lightning {
+  width: 30px;
+  height: 30px;
+  background: url('img/lightning.svg') center center no-repeat;
+  background-size: contain;
+  animation: flash 0.5s infinite;
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
 }
