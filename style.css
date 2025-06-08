@@ -68,7 +68,7 @@ h1 {
   padding: 10px 15px; 
   /* background-color: #f0f0f0;  Прибираємо загальний фон, щоб не конфліктував */
   border-radius: 15px;
-  max-width: 70%;               /* ✅ Повідомлення не вилазить */
+  max-width: 85%;               /* ✅ Повідомлення не вилазить */
   word-break: break-word;        /* ✅ Ламає слова */
   white-space: pre-wrap;         /* ✅ Переносить \n і довгі рядки */
   overflow-wrap: break-word;     /* ✅ Браузерна підтримка */
