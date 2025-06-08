@@ -294,6 +294,7 @@
       'img/7.jpg',
       'img/8.jpg',
       'img/9.jpg',
+      'img/10.jpg'
       // Додай більше шляхів до зображень тут
     ];
     let imagesInGalleryLoaded = false;
@@ -312,13 +313,26 @@
 
     openGalleryBtn.addEventListener('click', () => {
       populateGallery();
-      imageGalleryModal.style.display = 'flex';
+      imageGalleryModal.style.display = 'flex'; // Спочатку робимо блок видимим
+      imageGalleryModal.classList.remove('hide'); // Видалити клас hide, якщо він є
+      imageGalleryModal.classList.add('show');
       document.body.style.overflow = 'hidden'; // Запобігти прокрутці фону
     });
 
     closeGalleryBtn.addEventListener('click', () => {
-      imageGalleryModal.style.display = 'none';
-      document.body.style.overflow = 'auto'; // Відновити прокрутку фону
+      imageGalleryModal.classList.remove('show');
+      imageGalleryModal.classList.add('hide');
+      
+      // Зачекати завершення анімації перед тим, як приховати елемент і відновити прокрутку
+      setTimeout(() => {
+        if (!imageGalleryModal.classList.contains('show')) { // Перевірка, чи не відкрили знову
+          // Клас .hide вже має анімацію, яка закінчується opacity: 0.
+          // display: none; тепер встановлюється початково і прибирається при .show
+          // Тому тут можна просто переконатися, що клас .hide є, а .show немає.
+        }
+        document.body.style.overflow = 'auto'; // Відновити прокрутку фону
+      }, 400); // Час має відповідати тривалості анімації fadeOutModal
+
     });
 
     prevImageBtn.addEventListener('click', () => {

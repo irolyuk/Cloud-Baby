@@ -400,12 +400,48 @@ h1 {
   width: 100%;
   height: 100%;
   background-color: rgba(255, 228, 225, 0.9); /* Напівпрозорий рожевий фон */
-  display: flex;
+  display: none; /* Початково приховано */
   align-items: center;
   justify-content: center;
   z-index: 1000; /* Поверх усього */
   padding: 20px;
   box-sizing: border-box;
+  opacity: 0; /* Початкова прозорість для анімації, буде змінена класом .show */
+}
+
+/* Анімація для появи модального вікна галереї */
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Анімація для зникнення модального вікна галереї */
+@keyframes fadeOutModal {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+}
+
+.gallery-modal.show {
+  display: flex; /* Цей клас робить вікно видимим */
+  animation: fadeInModal 0.4s ease-out forwards;
+  opacity: 1; /* Переконуємося, що кінцева прозорість 1 */
+}
+
+.gallery-modal.hide {
+  /* display: flex; залишається, щоб анімація зникнення була видима */
+  animation: fadeOutModal 0.4s ease-out forwards;
 }
 
 .gallery-close-btn {
@@ -439,6 +475,7 @@ h1 {
   display: flex;
   overflow-x: auto; /* Горизонтальна прокрутка */
   scroll-snap-type: x mandatory; /* Плавне прилипання до зображень при скролі */
+  scroll-snap-stop: always; /* Завжди зупинятися на точці прилипання */
   -webkit-overflow-scrolling: touch; /* Плавний скрол на iOS */
   width: 100%; /* Контейнер займає всю доступну ширину */
   height: 100%; /* Контейнер займає всю доступну висоту */
