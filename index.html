@@ -53,6 +53,7 @@
     <div class="status-messages-container">
       <div id="users-online" class="users-online"></div>
       <div id="typing-indicator" class="users-online"></div>
+      <div id="imageUploadIndicator" class="upload-indicator" style="display: none;">Відправка зображення... 🖼️</div>
     </div>
   </div>
 
@@ -210,14 +211,49 @@
       imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file && file.type.startsWith('image/')) {
+          const uploadIndicator = document.getElementById('imageUploadIndicator');
+          uploadIndicator.style.display = 'block'; // Показати індикатор
+
           const reader = new FileReader();
           reader.onload = function(e) {
-            const imageDataUrl = e.target.result;
-            // Відправляємо зображення на сервер
-            socket.emit("message", { type: 'image', image: imageDataUrl });
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 800; // Максимальна ширина
+              const MAX_HEIGHT = 600; // Максимальна висота
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+                }
+              } else {
+                if (height > MAX_HEIGHT) {
+                  width *= MAX_HEIGHT / height;
+                  height = MAX_HEIGHT;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Отримуємо стиснене зображення як JPEG з якістю 0.7 (можна змінювати)
+              const compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+
+              socket.emit("message", { type: 'image', image: compressedImageDataUrl }, () => {
+                uploadIndicator.style.display = 'none';
+              });
+            }
+            img.src = e.target.result; // Завантажуємо оригінальне зображення для обробки
           }
           reader.readAsDataURL(file);
           imageInput.value = ''; // Скидаємо значення інпуту, щоб можна було вибрати той самий файл знову
+        } else if (file) { // Якщо файл вибрано, але це не зображення
+            alert("Будь ласка, виберіть файл зображення (JPEG, PNG, GIF).");
+            uploadIndicator.style.display = 'none'; // Приховати індикатор, якщо файл не підходить
         }
       });
     }

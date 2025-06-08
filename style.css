@@ -129,6 +129,14 @@ h1 {
   flex-direction: column; /* Елементи всередині йдуть один під одним */
   align-items: center; /* Центрує дочірні елементи по горизонталі */
 }
+
+.upload-indicator {
+  font-size: 0.9rem;
+  color: #d63384; /* Рожевий колір, як у заголовка */
+  margin-top: 5px;
+  text-align: center;
+}
+
 /* Адаптивність */
 @media (max-width: 600px) {
   .chat-container {

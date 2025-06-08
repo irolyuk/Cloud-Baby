@@ -4,7 +4,7 @@ from flask_cors import CORS # type: ignore
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", max_http_buffer_size=10 * 1024 * 1024) # Збільшуємо до 10MB
 
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
