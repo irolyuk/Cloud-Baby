@@ -197,13 +197,13 @@ def update_tamagotchi_passively():
     if tamagotchi_state["hunger"] == 0 or tamagotchi_state["happiness"] == 0:
         tamagotchi_state["is_alive"] = False
         print(f"[{current_timestamp}] {tamagotchi_state['name']} is no longer alive due to low stats.")
-        emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+        socketio.emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
         if tamagotchi_timer:
             tamagotchi_timer.cancel()
             tamagotchi_timer = None
         return
     
-    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+    socketio.emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
     print(f"[{current_timestamp}] Emitted update_tamagotchi_state.")
     
     # Перезапускаємо таймер
