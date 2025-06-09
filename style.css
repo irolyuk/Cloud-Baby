@@ -87,6 +87,7 @@ h1 {
   background-color: #f9f9f9; /* Дуже світлий фон */
   border-radius: 10px; /* Легке закруглення */
   font-size: 0.6rem;
+  text-align: center; /* Додаємо для центрування тексту */
 }
 
 @keyframes fadeIn {
