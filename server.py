@@ -60,7 +60,7 @@ def handle_delete_message(data):
     user_sid = request.sid
     requesting_user = users.get(user_sid)
 
-    global history
+    # global history # 'global' не потрібен тут, оскільки ми модифікуємо список на місці
     message_found = False
     for message in history:
         if message.get('messageId') == message_id_to_delete:
@@ -71,11 +71,11 @@ def handle_delete_message(data):
                 message_found = True
             else:
                 # Можна надіслати помилку користувачу, якщо він намагається видалити чуже повідомлення
-                emit('action_error', {'message': 'Ви не можете видалити це повідомлення.'}, room=user_sid)
+                emit('action_error', {'message': 'Ви не можете видалити це повідомлення.'}, to=user_sid)
             break
     # Якщо повідомлення не знайдено (можливо, вже видалено або невірний ID)
-    if not message_found and requesting_user:
-        emit('action_error', {'message': 'Повідомлення для видалення не знайдено.'}, room=user_sid)
+    if not message_found and requesting_user: # Переконуємося, що requesting_user існує перед надсиланням помилки
+        emit('action_error', {'message': 'Повідомлення для видалення не знайдено.'}, to=user_sid)
 
 @socketio.on('edit_message')
 def handle_edit_message(data):
@@ -84,6 +84,9 @@ def handle_edit_message(data):
     user_sid = request.sid
     requesting_user = users.get(user_sid)
 
+    if not requesting_user: # Користувач міг відключитися
+        return
+
     for message in history:
         if message.get('messageId') == message_id_to_edit and message.get('user') == requesting_user and message.get('type') == 'text':
             message['text'] = new_text
@@ -91,8 +94,7 @@ def handle_edit_message(data):
             emit('message_edited', {'messageId': message_id_to_edit, 'newText': new_text, 'user': requesting_user}, broadcast=True)
             return
     # Якщо повідомлення не знайдено або не може бути відредаговано
-    if requesting_user:
-        emit('action_error', {'message': 'Повідомлення для редагування не знайдено або не може бути змінено.'}, room=user_sid)
+    emit('action_error', {'message': 'Повідомлення для редагування не знайдено або не може бути змінено.'}, to=user_sid)
 
 @app.route('/')
 def index():
