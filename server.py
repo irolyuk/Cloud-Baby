@@ -19,20 +19,6 @@ users = {}  # Зберігає нікнейми активних користу�
 history = []
 current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
 
-# --- Тамагочі ---
-tamagotchi_timer = None
-TICK_INTERVAL = 60 * 3 # 3 хвилини
-
-DEFAULT_TAMAGOTCHI_STATE = {
-    "name": "Хмаринка",
-    "hunger": 50,   # 0 (дуже голодний) - 100 (ситий)
-    "happiness": 50, # 0 (дуже сумний) - 100 (щасливий)
-    "is_alive": True,
-    "last_interaction_time": time.time() # Час останньої взаємодії або оновлення
-}
-# Ініціалізуємо стан Тамагочі при старті сервера
-tamagotchi_state = DEFAULT_TAMAGOTCHI_STATE.copy()
-
 
 @socketio.on('connect')
 def handle_connect():
@@ -43,14 +29,10 @@ def handle_connect():
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
     
-    # Надсилаємо стан Тамагочі, якщо він існує
-    if tamagotchi_state and tamagotchi_state["is_alive"]:
-        emit('update_tamagotchi_state', tamagotchi_state, to=request.sid)
     # Решта логіки підключення (наприклад, очікування 'register') залишається
-
 @socketio.on('register')
 def handle_register(nickname):
-    global current_global_track, tamagotchi_timer # Доступ до глобальних змінних
+    global current_global_track # Доступ до глобальних змінних
     users[request.sid] = nickname
     emit("users_online", list(users.values()), broadcast=True)
     # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
@@ -60,17 +42,7 @@ def handle_register(nickname):
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
     
-    # Також надсилаємо стан Тамагочі після реєстрації
-    if tamagotchi_state and tamagotchi_state["is_alive"]:
-        emit('update_tamagotchi_state', tamagotchi_state, to=request.sid)
-    
-    # Якщо це перший користувач онлайн і Тамагочі живий, але таймер неактивний, запускаємо його
-    if len(users) == 1 and tamagotchi_state and tamagotchi_state["is_alive"] and not tamagotchi_timer:
-        tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
-        tamagotchi_timer.start()
-        print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi timer STARTED from REGISTER because it's the first user and Tamagotchi is alive.")
-
-
+    # Логіка запуску таймера Тамагочі видалена
 
 
 @socketio.on('message')
@@ -162,91 +134,6 @@ def handle_control_global_music(data):
         if current_global_track and current_global_track['audiosrc'] == audiosrc:
             current_global_track = None
             emit('update_global_music_state', {'status': 'stopped'}, broadcast=True)
-
-# --- Тамагочі Обробники ---
-def update_tamagotchi_passively():
-    global tamagotchi_state, tamagotchi_timer
-    current_timestamp = time.strftime('%H:%M:%S')
-    print(f"[{current_timestamp}] update_tamagotchi_passively CALLED.")
-
-    if not tamagotchi_state or not tamagotchi_state["is_alive"]:
-        print(f"[{current_timestamp}] Tamagotchi is not initialized or not alive. Stopping timer if active.")
-        if tamagotchi_timer:
-            tamagotchi_timer.cancel()
-            tamagotchi_timer = None
-        return
-    
-    if not users: # Якщо немає користувачів онлайн, не оновлюємо стан і зупиняємо таймер
-        print(f"[{current_timestamp}] No users online. Stopping timer if active.")
-        if tamagotchi_timer:
-            tamagotchi_timer.cancel()
-            tamagotchi_timer = None
-        return
-
-    print(f"[{current_timestamp}] Tamagotchi is alive and users are online. Proceeding to update stats.")
-    print(f"[{current_timestamp}] Current state BEFORE update: {tamagotchi_state}")
-
-    # Зменшуємо показники з часом, але не частіше ніж раз на TICK_INTERVAL
-    tamagotchi_state["hunger"] = max(0, tamagotchi_state["hunger"] - 5) # Голодніє
-    tamagotchi_state["happiness"] = max(0, tamagotchi_state["happiness"] - 3) # Сумнішає
-    tamagotchi_state["last_interaction_time"] = time.time() # Оновлюємо час останнього оновлення
-
-    print(f"[{current_timestamp}] Current state AFTER update: {tamagotchi_state}")
-
-    if tamagotchi_state["hunger"] == 0 or tamagotchi_state["happiness"] == 0:
-        tamagotchi_state["is_alive"] = False
-        print(f"[{current_timestamp}] {tamagotchi_state['name']} is no longer alive due to low stats.")
-        socketio.emit('update_tamagotchi_state', tamagotchi_state) # broadcast=True не потрібен тут
-        if tamagotchi_timer:
-            tamagotchi_timer.cancel()
-            tamagotchi_timer = None
-        return
-    
-    socketio.emit('update_tamagotchi_state', tamagotchi_state) # broadcast=True не потрібен тут
-    print(f"[{current_timestamp}] Emitted update_tamagotchi_state.")
-    
-    # Перезапускаємо таймер
-    tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
-    tamagotchi_timer.start()
-    print(f"[{current_timestamp}] Tamagotchi timer RESTARTED for next tick.")
-
-@socketio.on('initialize_tamagotchi')
-def handle_initialize_tamagotchi():
-    global tamagotchi_state, tamagotchi_timer
-    tamagotchi_state = DEFAULT_TAMAGOTCHI_STATE.copy()
-    tamagotchi_state["last_interaction_time"] = time.time()
-    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
-    print(f"[{time.strftime('%H:%M:%S')}] {tamagotchi_state['name']} has been initialized/revived. State: {tamagotchi_state}")
-    
-    # Запускаємо таймер, тільки якщо є користувачі онлайн
-    if users:
-        if tamagotchi_timer:
-            tamagotchi_timer.cancel()
-            print(f"[{time.strftime('%H:%M:%S')}] Previous Tamagotchi timer cancelled during initialization.")
-        tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
-        tamagotchi_timer.start()
-        print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi timer STARTED from initialize_tamagotchi as users are online.")
-    else:
-        print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi timer NOT started from initialize_tamagotchi as NO users are online.")
-
-@socketio.on('tamagotchi_action')
-def handle_tamagotchi_action(data):
-    global tamagotchi_state
-    if not tamagotchi_state or not tamagotchi_state["is_alive"]:
-        emit('action_error', {'message': f'{DEFAULT_TAMAGOTCHI_STATE["name"]} спить або ще не створений.'}, to=request.sid)
-        return
-    print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi action received: {data}. Current state: {tamagotchi_state}")
-
-    action = data.get('action')
-    if action == 'feed':
-        tamagotchi_state["hunger"] = min(100, tamagotchi_state["hunger"] + 25)
-        tamagotchi_state["happiness"] = min(100, tamagotchi_state["happiness"] + 5) # Їжа робить трохи щасливішим
-    elif action == 'play':
-        tamagotchi_state["happiness"] = min(100, tamagotchi_state["happiness"] + 30)
-        tamagotchi_state["hunger"] = max(0, tamagotchi_state["hunger"] - 10) # Граючись, трохи голодніє
-    tamagotchi_state["last_interaction_time"] = time.time()
-    socketio.emit('update_tamagotchi_state', tamagotchi_state) # Надсилаємо всім, включаючи відправника
-    print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi state after action '{action}': {tamagotchi_state}. Emitted update.")
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
 # але логіка в 'connect' та 'register' має покривати більшість випадків.

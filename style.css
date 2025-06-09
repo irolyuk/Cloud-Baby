@@ -1064,38 +1064,3 @@ h1 {
   background-color: #d3d9df;
   transform: translateY(-1px);
 }
-
-/* === Стилі для Тамагочі === */
-.tamagotchi-area {
-  background-color: #fff0f5; /* Світло-рожевий фон, як у поля вводу */
-  border: 1px solid #f8cdda; /* Рожева рамка */
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 10px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
-}
-
-#tamagotchiName {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #d63384; /* Рожевий, як заголовок */
-  margin-bottom: 5px;
-}
-
-#tamagotchiEmoji {
-  font-size: 3rem; /* Великий смайлик */
-  margin-bottom: 10px;
-  line-height: 1;
-}
-
-.tamagotchi-area div {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 8px;
-}
-
-.tamagotchi-area button {
-  margin: 5px;
-  /* item-btn вже має стилі, але можна додати специфічні, якщо потрібно */
-}
