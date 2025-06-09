@@ -37,7 +37,8 @@ def handle_message(msg):
         "user": user,
         "type": msg.get('type', 'text'), # Тип повідомлення, за замовчуванням 'text'
         "text": msg.get('text'),         # Текст
-        "image": msg.get('image')        # Дані зображення, будуть None для тексту
+        "image": msg.get('image'),       # Дані зображення, будуть None для тексту
+        "replyTo": msg.get('replyTo')    # Додаємо інформацію про відповідь
     }
     
     history.append(message_data)

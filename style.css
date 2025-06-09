@@ -96,18 +96,36 @@ h1 {
 /* Стилі для кнопок дій над повідомленням (Редагувати, Видалити) */
 .message-actions {
   position: absolute;
-  top: 2px;    /* Відступ зверху від краю повідомлення */
-  right: 2px;  /* Відступ справа від краю повідомлення */
-  display: none; /* Початково приховані */
-  gap: 3px;    /* Проміжок між кнопками */
-  background-color: rgba(255, 255, 255, 0.7); /* Напівпрозорий фон для кращої видимості */
-  padding: 2px 4px;
-  border-radius: 5px;
+  top: 50%; /* Вирівнювання по центру по вертикалі */
+  transform: translateY(-50%);
+  display: flex; /* Змінено з none, щоб кнопки були видимі, якщо :hover нижче закоментовано */
+  flex-direction: column; /* Розташування кнопок одна під одною */
+  gap: 4px;    /* Проміжок між кнопками */
+  /* background-color: rgba(255, 255, 255, 0.7); - Можна прибрати, якщо не потрібен фон */
+  /* padding: 2px 4px; - Можна прибрати або налаштувати */
+  /* border-radius: 5px; - Можна прибрати або налаштувати */
   z-index: 1; /* Щоб були поверх тексту повідомлення, якщо текст дуже довгий */
+  
+  /* Якщо ви хочете, щоб кнопки з'являлися при наведенні: */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.message-actions.actions-left {
+  right: 100%; 
+  margin-right: 8px; /* Відступ від повідомлення зліва */
+}
+
+.message-actions.actions-right {
+  left: 100%;
+  margin-left: 8px; /* Відступ від повідомлення справа */
 }
 
 .message:hover .message-actions {
-  display: flex; /* Показувати при наведенні на повідомлення */
+  /* display: flex; - Замінюємо на visibility/opacity для плавного з'явлення */
+  visibility: visible;
+  opacity: 1;
 }
 
 .action-btn { /* Загальні стилі для кнопок дій */
@@ -811,8 +829,61 @@ h1 {
   object-fit: cover; /* Щоб зображення заповнювало мініатюру, зберігаючи пропорції */
 }
 
-.message-sender {
-  display: block; /* Щоб ім'я відправника було на окремому рядку перед зображенням */
+.message-sender { /* Стиль за замовчуванням для текстових повідомлень */
+  display: inline; /* Нікнейм та текст в одному рядку */
+  font-weight: bold;
+  /* margin-bottom: 4px; - Прибираємо, не потрібен для inline */
+}
+
+.message-sender.message-sender-image { /* Спеціальний стиль для повідомлень із зображенням */
+  display: block; /* Нікнейм над зображенням */
   margin-bottom: 4px;
-  font-weight: bold; /* Можна додати, якщо потрібно виділити */
+  /* font-weight: bold; - Вже успадковано від .message-sender */
+}
+
+.message-text-content {
+  display: inline-block; /* Дозволяє елементу бути в рядку, але обробляти переноси всередині себе */
+  vertical-align: top;   /* Вирівнює верхню межу тексту повідомлення з верхньою межею нікнейма */
+  word-break: break-word;  /* Додатково для кращого переносу слів, хоча це вже є на .message */
+}
+
+.message-reply-quote {
+  background-color: rgba(0, 0, 0, 0.05); /* Трохи темніший фон для цитати */
+  padding: 5px 8px;
+  margin-bottom: 5px; /* Відступ від основного тексту повідомлення */
+  border-left: 3px solid #adb5bd; /* Сіра лінія зліва */
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: #495057;
+  cursor: pointer; /* Вказує, що можна клікнути */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-reply-quote strong {
+  color: #0056b3; /* Колір для імені автора цитати */
+}
+
+.message-reply-quote:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.highlight-message {
+  animation: highlightAnimation 1.5s ease-out;
+}
+
+@keyframes highlightAnimation {
+  0% { background-color: rgba(255, 255, 0, 0.5); } /* Початок з жовтим підсвічуванням */
+  70% { background-color: rgba(255, 255, 0, 0.5); } /* Тримаємо підсвічування */
+  100% { background-color: transparent; } /* Повертаємо до прозорого (або оригінального кольору повідомлення) */
+}
+
+
+/* Стилі для кнопки "Відповісти" (якщо ще не додані або для уточнення) */
+.action-btn.reply-btn {
+  color: #17a2b8; /* Бірюзовий для відповіді */
+}
+.action-btn.reply-btn:hover {
+  color: #117a8b;
 }
