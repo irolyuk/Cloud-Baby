@@ -2,6 +2,8 @@ from flask import Flask, request # type: ignore
 from flask_socketio import SocketIO, send, emit # type: ignore
 from flask_cors import CORS # type: ignore
 import uuid # Для генерації унікальних ID
+import threading
+import time # Потрібен для відстеження часу
 
 app = Flask(__name__)
 CORS(app)
@@ -11,6 +13,19 @@ users = {}  # Зберігає нікнейми активних користу�
 history = []
 current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
 
+# --- Тамагочі ---
+tamagotchi_state = None
+tamagotchi_timer = None
+TICK_INTERVAL = 60 * 3 # Кожні 3 хвилини для швидшого тестування, потім можна збільшити
+
+DEFAULT_TAMAGOTCHI_STATE = {
+    "name": "Хмаринка",
+    "hunger": 50,   # 0 (дуже голодний) - 100 (ситий)
+    "happiness": 50, # 0 (дуже сумний) - 100 (щасливий)
+    "is_alive": True,
+    "last_interaction_time": time.time() # Час останньої взаємодії або оновлення
+}
+
 @socketio.on('connect')
 def handle_connect():
     # При підключенні нового клієнта, надсилаємо йому поточний стан музики
@@ -19,6 +34,10 @@ def handle_connect():
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
+    
+    # Надсилаємо стан Тамагочі, якщо він існує
+    if tamagotchi_state and tamagotchi_state["is_alive"]:
+        emit('update_tamagotchi_state', tamagotchi_state, to=request.sid)
     # Решта логіки підключення (наприклад, очікування 'register') залишається
 
 @socketio.on('register')
@@ -32,6 +51,10 @@ def handle_register(nickname):
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
+    
+    # Також надсилаємо стан Тамагочі після реєстрації
+    if tamagotchi_state and tamagotchi_state["is_alive"]:
+        emit('update_tamagotchi_state', tamagotchi_state, to=request.sid)
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -128,6 +151,70 @@ def handle_control_global_music(data):
         if current_global_track and current_global_track['audiosrc'] == audiosrc:
             current_global_track = None
             emit('update_global_music_state', {'status': 'stopped'}, broadcast=True)
+
+# --- Тамагочі Обробники ---
+def update_tamagotchi_passively():
+    global tamagotchi_state, tamagotchi_timer
+    if not tamagotchi_state or not tamagotchi_state["is_alive"]:
+        if tamagotchi_timer:
+            tamagotchi_timer.cancel()
+            tamagotchi_timer = None
+        return
+
+    current_time = time.time()
+    # Зменшуємо показники з часом, але не частіше ніж раз на TICK_INTERVAL
+    # Це базова логіка, можна зробити складнішою, враховуючи час з last_interaction_time
+
+    tamagotchi_state["hunger"] = max(0, tamagotchi_state["hunger"] - 5) # Голодніє
+    tamagotchi_state["happiness"] = max(0, tamagotchi_state["happiness"] - 3) # Сумнішає
+
+    if tamagotchi_state["hunger"] == 0 or tamagotchi_state["happiness"] == 0:
+        # Дуже поганий стан, може "померти"
+        # Для простоти, якщо один з показників 0, то "вмирає"
+        tamagotchi_state["is_alive"] = False
+        emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+        print(f"{tamagotchi_state['name']} is no longer alive.")
+        if tamagotchi_timer:
+            tamagotchi_timer.cancel()
+            tamagotchi_timer = None
+        return
+    
+    tamagotchi_state["last_interaction_time"] = current_time
+    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+    
+    # Перезапускаємо таймер
+    tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
+    tamagotchi_timer.start()
+
+@socketio.on('initialize_tamagotchi')
+def handle_initialize_tamagotchi():
+    global tamagotchi_state, tamagotchi_timer
+    tamagotchi_state = DEFAULT_TAMAGOTCHI_STATE.copy()
+    tamagotchi_state["last_interaction_time"] = time.time()
+    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+    print(f"{tamagotchi_state['name']} has been initialized/revived.")
+
+    if tamagotchi_timer:
+        tamagotchi_timer.cancel()
+    tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
+    tamagotchi_timer.start()
+
+@socketio.on('tamagotchi_action')
+def handle_tamagotchi_action(data):
+    global tamagotchi_state
+    if not tamagotchi_state or not tamagotchi_state["is_alive"]:
+        emit('action_error', {'message': f'{DEFAULT_TAMAGOTCHI_STATE["name"]} спить або ще не створений.'}, to=request.sid)
+        return
+
+    action = data.get('action')
+    if action == 'feed':
+        tamagotchi_state["hunger"] = min(100, tamagotchi_state["hunger"] + 25)
+        tamagotchi_state["happiness"] = min(100, tamagotchi_state["happiness"] + 5) # Їжа робить трохи щасливішим
+    elif action == 'play':
+        tamagotchi_state["happiness"] = min(100, tamagotchi_state["happiness"] + 30)
+        tamagotchi_state["hunger"] = max(0, tamagotchi_state["hunger"] - 10) # Граючись, трохи голодніє
+    tamagotchi_state["last_interaction_time"] = time.time()
+    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
 # але логіка в 'connect' та 'register' має покривати більшість випадків.

@@ -66,6 +66,17 @@
       <div id="users-online" class="users-online"></div>      
       <div id="imageUploadIndicator" class="upload-indicator" style="display: none;">Відправка зображення... 🖼️</div>
     </div>
+
+    <!-- Блок Тамагочі -->
+    <div id="tamagotchiArea" class="tamagotchi-area" style="display: none;">
+      <div id="tamagotchiName"></div>
+      <div id="tamagotchiEmoji"></div>
+      <div>Голод: <span id="tamagotchiHunger"></span>/100</div>
+      <div>Щастя: <span id="tamagotchiHappiness"></span>/100</div>
+      <button id="feedTamagotchiBtn" class="item-btn">Погодувати 🍼</button>
+      <button id="playTamagotchiBtn" class="item-btn">Погратися 🥰</button>
+      <button id="initTamagotchiBtn" class="item-btn">Розбудити ✨</button>
+    </div>
   </div>
 
   <!-- Модальне вікно для зображень з чату -->
@@ -87,6 +98,18 @@
       <button id="nextImageBtn" class="gallery-nav-btn next-btn" aria-label="Next image">&gt;</button>
     </div>
   </div>
+
+  <!-- Модальне вікно для підтвердження видалення -->
+  <div id="customConfirmModal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-content">
+      <span id="customConfirmModalCloseBtn" class="custom-modal-close-btn">&times;</span>
+      <p id="customConfirmModalText">Удаліть 😱?</p>
+      <div class="custom-modal-buttons">
+        <button id="customConfirmOkBtn" class="custom-modal-btn custom-modal-ok-btn">Так</button>
+        <button id="customConfirmCancelBtn" class="custom-modal-btn custom-modal-cancel-btn">Скасувати</button>
+      </div>
+    </div>
+  </div>
   <script>
     let selectedNickname = null;
     let socket = null;
@@ -95,6 +118,7 @@
     let currentPlayingButton = null;
     let currentReplyInfo = null; // Для зберігання інформації про повідомлення, на яке відповідаємо
     let currentGlobalAudioSrc = null; // Зберігає src поточної глобальної пісні
+    let messageIdToDeleteGlobally = null; // Для збереження ID повідомлення, яке підтверджується на видалення
 
     // DOM Element References - Initialized once the script loads
     // Login Screen
@@ -136,6 +160,23 @@
     // Media Controls
     const volumeToggleButton = document.getElementById('volumeToggleButton');
     const volumeSlider = document.getElementById('volumeSlider');
+
+    // Custom Confirm Modal Elements
+    const customConfirmModal = document.getElementById('customConfirmModal');
+    const customConfirmModalText = document.getElementById('customConfirmModalText');
+    const customConfirmOkBtn = document.getElementById('customConfirmOkBtn');
+    const customConfirmCancelBtn = document.getElementById('customConfirmCancelBtn');
+    const customConfirmModalCloseBtn = document.getElementById('customConfirmModalCloseBtn');
+
+    // Tamagotchi Elements
+    const tamagotchiArea = document.getElementById('tamagotchiArea');
+    const tamagotchiNameDisplay = document.getElementById('tamagotchiName');
+    const tamagotchiEmojiDisplay = document.getElementById('tamagotchiEmoji');
+    const tamagotchiHungerDisplay = document.getElementById('tamagotchiHunger');
+    const tamagotchiHappinessDisplay = document.getElementById('tamagotchiHappiness');
+    const feedTamagotchiBtn = document.getElementById('feedTamagotchiBtn');
+    const playTamagotchiBtn = document.getElementById('playTamagotchiBtn');
+    const initTamagotchiBtn = document.getElementById('initTamagotchiBtn');
 
     // Global Constants
     const avatars = {
@@ -280,6 +321,13 @@
           chatTypingIndicator.style.visibility = 'hidden';
         }
       });
+
+      socket.on('update_tamagotchi_state', (state) => {
+        renderTamagotchi(state);
+      });
+
+      // Запит початкового стану тамагочі (сервер надсилає його при connect/register)
+      // або можна додати кнопку "Перевірити стан Хмаринки"
 
 
       socket.emit("get_history");
@@ -653,16 +701,29 @@
     populateEmojiPanel(); 
 
     function deleteMessage(messageId) {
-      // Перевірка, чи це повідомлення містить активний глобальний трек
-      // (якщо повідомлення з музикою будуть видалятися і це має зупиняти музику)
-      // Наразі логіка видалення повідомлень не пов'язана з музикою.
-      // Якщо в майбутньому повідомлення будуть містити кнопки для запуску музики,
-      // і видалення такого повідомлення має зупиняти музику, тут потрібна буде додаткова логіка.
-      if (confirm("Ви впевнені, що хочете видалити це повідомлення?")) {
+      messageIdToDeleteGlobally = messageId;
+      customConfirmModalText.textContent = "Удаліть 😱?";
+      customConfirmModal.style.display = 'flex';
+    }
+
+    function hideCustomConfirm() {
+      customConfirmModal.style.display = 'none';
+      messageIdToDeleteGlobally = null;
+    }
+
+    if (customConfirmOkBtn) {
+      customConfirmOkBtn.addEventListener('click', () => {
         if (socket) {
-          socket.emit('delete_message', { messageId });
+          socket.emit('delete_message', { messageId: messageIdToDeleteGlobally });
         }
-      }
+        hideCustomConfirm();
+      });
+    }
+    if (customConfirmCancelBtn) {
+      customConfirmCancelBtn.addEventListener('click', hideCustomConfirm);
+    }
+    if (customConfirmModalCloseBtn) {
+      customConfirmModalCloseBtn.addEventListener('click', hideCustomConfirm);
     }
 
     function startEditMessage(messageId, messageDiv, currentText) {
@@ -777,6 +838,53 @@
       // Переконайтеся, що ви додали атрибут data-audiosrc до HTML-кнопок музики
       return document.querySelector(`.media-controls-area .item-btn[data-audiosrc="${audiosrc}"]`);
     }
+
+    // Закриття модального вікна підтвердження при кліку поза ним
+    window.addEventListener('click', (event) => {
+      if (event.target === customConfirmModal) {
+        hideCustomConfirm();
+      }
+    });
+
+    // --- Tamagotchi Functions ---
+    function renderTamagotchi(state) {
+      if (!state) {
+        tamagotchiArea.style.display = 'none';
+        return;
+      }
+      tamagotchiArea.style.display = 'block';
+      tamagotchiNameDisplay.textContent = state.name;
+      tamagotchiHungerDisplay.textContent = state.hunger;
+      tamagotchiHappinessDisplay.textContent = state.happiness;
+
+      if (!state.is_alive) {
+        tamagotchiEmojiDisplay.textContent = '👻';
+        feedTamagotchiBtn.style.display = 'none';
+        playTamagotchiBtn.style.display = 'none';
+        initTamagotchiBtn.textContent = `Оживити ${state.name} ✨`;
+      } else {
+        feedTamagotchiBtn.style.display = 'inline-block';
+        playTamagotchiBtn.style.display = 'inline-block';
+        initTamagotchiBtn.textContent = `Перезапустити ${state.name} ✨`; // Або приховати, якщо вже живий
+
+        if (state.hunger < 20 || state.happiness < 20) {
+          tamagotchiEmojiDisplay.textContent = '😢'; // Дуже сумний/голодний
+        } else if (state.hunger < 40 || state.happiness < 40) {
+          tamagotchiEmojiDisplay.textContent = '😟'; // Сумний/голодний
+        } else if (state.happiness > 80 && state.hunger > 60) {
+          tamagotchiEmojiDisplay.textContent = '🥰'; // Дуже щасливий і ситий
+        } else {
+          tamagotchiEmojiDisplay.textContent = '😊'; // Нормальний стан
+        }
+      }
+    }
+
+    initTamagotchiBtn.addEventListener('click', () => {
+      socket.emit('initialize_tamagotchi');
+    });
+    feedTamagotchiBtn.addEventListener('click', () => socket.emit('tamagotchi_action', { action: 'feed' }));
+    playTamagotchiBtn.addEventListener('click', () => socket.emit('tamagotchi_action', { action: 'play' }));
+
 
   </script>
 
