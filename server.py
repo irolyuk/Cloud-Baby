@@ -92,7 +92,7 @@ def handle_message(msg):
     history.append(message_data)
     if len(history) > 50:
         history.pop(0)
-    emit('message', message_data, broadcast=True) # Використовуємо emit з подією 'message'
+    socketio.emit('message', message_data) # Надсилаємо всім, включаючи відправника
 
 @socketio.on('get_history')
 def handle_history():
@@ -245,7 +245,7 @@ def handle_tamagotchi_action(data):
         tamagotchi_state["happiness"] = min(100, tamagotchi_state["happiness"] + 30)
         tamagotchi_state["hunger"] = max(0, tamagotchi_state["hunger"] - 10) # Граючись, трохи голодніє
     tamagotchi_state["last_interaction_time"] = time.time()
-    emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+    socketio.emit('update_tamagotchi_state', tamagotchi_state) # Надсилаємо всім, включаючи відправника
     print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi state after action '{action}': {tamagotchi_state}. Emitted update.")
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
