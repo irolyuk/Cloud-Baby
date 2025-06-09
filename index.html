@@ -99,6 +99,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Аудіо для сповіщень -->
+  <audio id="notificationSound" src="audio/notification.mp3" preload="auto"></audio>
   <script>
     let selectedNickname = null;
     let socket = null;
@@ -156,6 +159,9 @@
     const customConfirmOkBtn = document.getElementById('customConfirmOkBtn');
     const customConfirmCancelBtn = document.getElementById('customConfirmCancelBtn');
     const customConfirmModalCloseBtn = document.getElementById('customConfirmModalCloseBtn');
+
+    // Audio Notification
+    const notificationSound = document.getElementById('notificationSound');
 
     // Global Constants
     const avatars = {
@@ -218,9 +224,12 @@
 
 
       socket.on("message", (data) => { // Обробник нових повідомлень
-        const messageElement = renderMessage(data); 
+        const messageElement = renderMessage(data);
         chat.appendChild(messageElement);
         scrollToBottom();
+        if (data.user !== selectedNickname && notificationSound) { // Відтворювати звук, якщо повідомлення не від поточного користувача
+          notificationSound.play().catch(e => console.warn("Не вдалося відтворити звук сповіщення:", e));
+        }
       });
 
       socket.on('update_global_music_state', (data) => {
