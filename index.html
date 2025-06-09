@@ -68,6 +68,24 @@
     </div>
   </div>
 
+  <!-- Блок для гри Камінь, Ножиці, Папір -->
+    <div id="rpsGameArea" class="rps-game-area" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 15px; border-radius: 8px; background-color: #f9f9f9; text-align: center;">
+      <h3 style="margin-top: 0;">Камінь, Ножиці, Папір</h3>
+      <div id="rpsStatus" style="min-height: 20px; font-weight: bold; margin-bottom: 10px;"></div>
+      <div id="rpsScore" style="margin-bottom: 10px;">Рахунок: Ти 0 - Суперник 0</div>
+      <div id="rpsPlayerMoves" style="display: flex; justify-content: space-around; margin-bottom: 15px; min-height: 30px;">
+        <div id="rpsYourMove" style="font-size: 1.2em;">Твій хід: <span id="yourChoiceDisplay"></span></div>
+        <div id="rpsOpponentMove" style="font-size: 1.2em;">Хід суперника: <span id="opponentChoiceDisplay"></span></div>
+      </div>
+      <div id="rpsChoices" style="display: none; margin-bottom: 10px;">
+        <button class="rps-btn" data-move="rock" style="font-size: 1.5em; margin: 5px; padding: 10px; cursor: pointer;">✊</button>
+        <button class="rps-btn" data-move="paper" style="font-size: 1.5em; margin: 5px; padding: 10px; cursor: pointer;">✋</button>
+        <button class="rps-btn" data-move="scissors" style="font-size: 1.5em; margin: 5px; padding: 10px; cursor: pointer;">✌️</button>
+      </div>
+      <button id="proposeRpsGameBtn" class="item-btn" style="margin-right: 10px;">Грати в КНП 🎲</button>
+      <button id="quitRpsGameBtn" class="item-btn" style="display: none;">Покинути гру 🏳️</button>
+    </div>
+
   <!-- Модальне вікно для зображень з чату -->
   <div id="chatImageDisplayModal" class="gallery-modal" style="display: none;">
     <button id="closeChatImageDisplayModalBtn" class="gallery-close-btn">&times;</button>
@@ -843,6 +861,231 @@
         hideCustomConfirm();
       }
     });
+
+    // --- Початок коду для гри Камінь, Ножиці, Папір ---
+
+// Глобальні змінні для елементів гри (переконайся, що вони не конфліктують з існуючими)
+const rpsGameArea = document.getElementById('rpsGameArea');
+const proposeRpsGameBtn = document.getElementById('proposeRpsGameBtn');
+const quitRpsGameBtn = document.getElementById('quitRpsGameBtn');
+const rpsStatus = document.getElementById('rpsStatus');
+const rpsScoreDisplay = document.getElementById('rpsScore'); // У HTML id="rpsScore"
+const rpsChoices = document.getElementById('rpsChoices');
+const rpsPlayerMoves = document.getElementById('rpsPlayerMoves'); // Контейнер для ходів
+const rpsOpponentMove = document.getElementById('rpsOpponentMove'); // Блок для ходу суперника
+const opponentChoiceDisplay = document.getElementById('opponentChoiceDisplay'); // Span для ходу суперника
+const rpsYourMove = document.getElementById('rpsYourMove'); // Блок для твого ходу
+const yourChoiceDisplay = document.getElementById('yourChoiceDisplay'); // Span для твого ходу
+
+let currentGameId = null;
+let rpsPlayerNicknames = []; // Будемо зберігати ніки гравців ['Baby 😎', 'Pink Cloud ☁️']
+let rpsLocalScores = { player1: 0, player2: 0 }; // Локальний рахунок для відображення, імена будуть з rpsPlayerNicknames
+
+// Функція для візуалізації ходу (камінь, ножиці, папір)
+function visualizeRpsMove(move) {
+    if (move === 'rock') return 'Камінь ✊';
+    if (move === 'paper') return 'Папір ✋';
+    if (move === 'scissors') return 'Ножиці ✌️';
+    return '?'; // Якщо хід ще невідомий
+}
+
+// Оновлення видимості кнопки "Запропонувати гру"
+function updateProposeRpsButtonVisibility(usersOnline) {
+  // usersOnline - це масив нікнеймів ['Baby 😎', 'Pink Cloud ☁️']
+  if (usersOnline.length === 2 && !currentGameId) { // Показуємо, якщо двоє і немає активної гри
+    proposeRpsGameBtn.style.display = 'inline-block';
+  } else {
+    proposeRpsGameBtn.style.display = 'none';
+  }
+}
+
+// Скидання UI гри до початкового стану
+function resetRpsUI(isLeavingGame = false) {
+    rpsGameArea.style.display = 'none';
+    rpsChoices.style.display = 'none';
+    rpsPlayerMoves.style.display = 'none'; // Ховаємо блок з ходами
+    rpsStatus.textContent = '';
+    rpsScoreDisplay.textContent = 'Рахунок: Ти 0 - Суперник 0';
+    opponentChoiceDisplay.textContent = '';
+    yourChoiceDisplay.textContent = '';
+    quitRpsGameBtn.style.display = 'none';
+    
+    currentGameId = null;
+    rpsPlayerNicknames = [];
+    rpsLocalScores = { player1: 0, player2: 0 };
+
+    // Оновлюємо видимість кнопки "Запропонувати гру"
+    // Потрібно отримати актуальний список користувачів, якщо він доступний глобально,
+    // або передати його сюди. Для простоти, припустимо, що usersOnlineDiv оновлюється.
+    const usersOnlineElements = usersOnlineDiv.querySelectorAll('.finger');
+    if (usersOnlineElements.length === 2) {
+        proposeRpsGameBtn.style.display = 'inline-block';
+    } else {
+        proposeRpsGameBtn.style.display = 'none';
+    }
+}
+
+// Обробники для кнопок гри
+if (proposeRpsGameBtn) {
+    proposeRpsGameBtn.addEventListener('click', () => {
+        if (socket && socket.connected) {
+            console.log("Клієнт: Пропоную гру КНП");
+            socket.emit('propose_rps_game');
+            rpsStatus.textContent = 'Запрошення надіслано...';
+            proposeRpsGameBtn.style.display = 'none';
+        }
+    });
+}
+
+if (quitRpsGameBtn) {
+    quitRpsGameBtn.addEventListener('click', () => {
+        if (socket && socket.connected && currentGameId) {
+            socket.emit('quit_rps_game', { game_id: currentGameId });
+            rpsStatus.textContent = 'Ви покинули гру.'; // Повідомлення для себе
+            resetRpsUI(); 
+        }
+    });
+}
+
+document.querySelectorAll('.rps-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        if (socket && socket.connected && currentGameId) {
+            const move = button.getAttribute('data-move');
+            console.log(`Клієнт: Роблю хід ${move} у грі ${currentGameId}`);
+            socket.emit('rps_make_move', { game_id: currentGameId, move: move });
+            
+            rpsStatus.textContent = 'Хід зроблено, очікуємо на суперника...';
+            yourChoiceDisplay.textContent = visualizeRpsMove(move);
+            rpsYourMove.style.display = 'block'; // Показуємо свій хід
+            rpsPlayerMoves.style.display = 'flex'; // Показуємо контейнер ходів
+            rpsChoices.style.display = 'none'; // Ховаємо кнопки вибору після ходу
+        }
+    });
+});
+
+// Ініціалізація обробників Socket.IO для гри
+function initializeRpsClientSocketHandlers() {
+    if (!socket) {
+        console.error("Socket не ініціалізовано для гри КНП!");
+        return;
+    }
+
+    socket.on('rps_invitation', (data) => {
+        // Використовуємо існуюче модальне вікно підтвердження
+        customConfirmModalText.textContent = `${data.inviter_nickname} пропонує зіграти в Камінь-Ножиці-Папір! Прийняти?`;
+        customConfirmOkBtn.onclick = () => {
+            socket.emit('rps_accept_invite', { game_id: data.game_id });
+            hideCustomConfirm();
+            // UI гри оновиться при отриманні 'rps_game_started'
+        };
+        customConfirmCancelBtn.onclick = () => {
+            socket.emit('rps_decline_invite', { game_id: data.game_id });
+            hideCustomConfirm();
+        };
+        customConfirmModalCloseBtn.onclick = customConfirmCancelBtn.onclick;
+        customConfirmModal.style.display = 'flex';
+    });
+
+    socket.on('rps_game_started', (data) => {
+        hideCustomConfirm(); // Закриваємо модалку, якщо вона була відкрита
+        currentGameId = data.game_id;
+        rpsPlayerNicknames = data.players; // Масив з двох нікнеймів
+        
+        // Ініціалізуємо рахунок для відображення
+        // Припускаємо, що selectedNickname - це нік поточного клієнта
+        const myNick = selectedNickname;
+        const opponentNick = rpsPlayerNicknames.find(nick => nick !== myNick);
+        rpsLocalScores = { [myNick]: 0, [opponentNick]: 0 };
+
+        rpsGameArea.style.display = 'block';
+        rpsStatus.textContent = 'Гра почалася! Ваш хід.';
+        rpsScoreDisplay.textContent = `Рахунок: ${myNick} ${rpsLocalScores[myNick]} - ${opponentNick} ${rpsLocalScores[opponentNick]}`;
+        
+        rpsChoices.style.display = 'flex'; // Показуємо кнопки вибору
+        rpsPlayerMoves.style.display = 'none'; // Ховаємо ходи на початку раунду
+        rpsYourMove.style.display = 'block'; // Готуємо місце для свого ходу
+        rpsOpponentMove.style.display = 'block'; // Готуємо місце для ходу суперника
+        yourChoiceDisplay.textContent = visualizeRpsMove(null); // Очищаємо попередній хід
+        opponentChoiceDisplay.textContent = visualizeRpsMove(null); // Очищаємо попередній хід
+
+        proposeRpsGameBtn.style.display = 'none';
+        quitRpsGameBtn.style.display = 'inline-block';
+    });
+
+    socket.on('rps_invite_declined', (data) => {
+        rpsStatus.textContent = `${data.decliner_nickname} відхилив(ла) запрошення.`;
+        // Оновлюємо видимість кнопки "Запропонувати гру"
+        const usersOnlineElements = usersOnlineDiv.querySelectorAll('.finger');
+        if (usersOnlineElements.length === 2) {
+            proposeRpsGameBtn.style.display = 'inline-block';
+        }
+    });
+
+    socket.on('rps_waiting_for_opponent', () => {
+        rpsStatus.textContent = 'Очікуємо на хід суперника...';
+        rpsChoices.style.display = 'none'; // Ховаємо кнопки, бо хід вже зроблено
+    });
+
+    socket.on('rps_round_result', (data) => {
+        rpsStatus.textContent = `Результат раунду: ${data.result_message}`;
+        
+        const myNick = selectedNickname;
+        const opponentNick = rpsPlayerNicknames.find(nick => nick !== myNick);
+
+        // Оновлюємо локальний рахунок
+        rpsLocalScores[myNick] = data.score[myNick];
+        rpsLocalScores[opponentNick] = data.score[opponentNick];
+        
+        rpsScoreDisplay.textContent = `Рахунок: ${myNick} ${rpsLocalScores[myNick]} - ${opponentNick} ${rpsLocalScores[opponentNick]}`;
+
+        // Відображаємо ходи
+        yourChoiceDisplay.textContent = visualizeRpsMove(data.moves[myNick]);
+        opponentChoiceDisplay.textContent = visualizeRpsMove(data.moves[opponentNick]);
+        rpsPlayerMoves.style.display = 'flex'; // Показуємо блок з ходами
+
+        // Готуємося до наступного раунду
+        setTimeout(() => {
+            if (currentGameId) { // Перевіряємо, чи гра ще активна
+                rpsStatus.textContent = 'Наступний раунд! Ваш хід.';
+                rpsChoices.style.display = 'flex'; // Показуємо кнопки вибору
+                rpsPlayerMoves.style.display = 'none'; // Ховаємо ходи
+                yourChoiceDisplay.textContent = visualizeRpsMove(null);
+                opponentChoiceDisplay.textContent = visualizeRpsMove(null);
+            }
+        }, 3500); // Пауза перед наступним раундом
+    });
+    
+    socket.on('rps_opponent_quit', (data) => {
+        rpsStatus.textContent = `${data.quitter_nickname || 'Суперник'} покинув гру.`;
+        resetRpsUI();
+    });
+
+    socket.on('rps_game_terminated_by_server', (data) => {
+        rpsStatus.textContent = data.message || 'Гра була завершена сервером (можливо, через відключення гравця).';
+        resetRpsUI();
+    });
+
+    // Обробник для загальних статусних повідомлень від сервера (якщо потрібно)
+    socket.on('status_message', (data) => {
+        // Можна відображати ці повідомлення в rpsStatus або в іншому місці
+        if (rpsGameArea.style.display === 'block' && rpsStatus.textContent.includes('Запрошення надіслано...')) {
+             // Не перезаписуємо, якщо вже є статус запрошення, або додаємо до нього
+        } else if (rpsGameArea.style.display === 'block') {
+            rpsStatus.textContent = data.message;
+        }
+        console.log("Статусне повідомлення від сервера:", data.message);
+    });
+     socket.on('action_error', (data) => {
+        // Можна відобразити помилку користувачу, наприклад, в rpsStatus
+        if (rpsGameArea.style.display === 'block') { // Показуємо помилку, тільки якщо ігровий інтерфейс активний
+            rpsStatus.textContent = `Помилка: ${data.message}`;
+        }
+        console.error("Помилка дії від сервера:", data.message);
+    });
+}
+
+// --- Кінець коду для гри Камінь, Ножиці, Папір ---
+
 
   </script>
 
