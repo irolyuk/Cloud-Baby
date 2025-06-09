@@ -15,7 +15,7 @@ body {
   position: relative; /* Для позиціонування кнопки галереї */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* Змінюємо, щоб елементи притискалися до верху */
   align-items: stretch;
   background-color: white;
   border: 2px solid #ffb6c1;
@@ -31,7 +31,7 @@ h1 {
   text-align: center;
   color: #d63384;
   font-size: 1.4rem;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0; /* Зменшено нижній відступ */
 }
 
 .message-baby {
@@ -60,7 +60,7 @@ h1 {
   flex-grow: 1;
   overflow-y: auto;
   font-size: 1rem;
-  max-height: 55vh;
+  /* max-height: 55vh; */ /* Максимальна висота чату, щоб не вилазило за межі контейнера */
   position: relative; /* Для позиціонування індикатора набору тексту, якщо знадобиться */
 }
 
@@ -81,13 +81,14 @@ h1 {
 /* Стилі для індикатора набору тексту всередині чату */
 .typing-message-in-chat {
   padding: 8px 12px;
-  margin: 5px 10px; /* Відступи схожі на повідомлення */
+  margin: 5px 10px 0px 10px; /* Верхній відступ 5px, нижній 0px */
   font-style: italic;
   color: #777; /* Сірий колір тексту */
   background-color: #f9f9f9; /* Дуже світлий фон */
   border-radius: 10px; /* Легке закруглення */
   font-size: 0.6rem;
   text-align: center; /* Додаємо для центрування тексту */
+  min-height: 1.2em; /* Мінімальна висота, щоб текст не зливався з іншими повідомленнями */
 }
 
 @keyframes fadeIn {
@@ -135,6 +136,7 @@ h1 {
 
 .users-online {
   text-align: center;
+  margin-top: 5px; /* Додано/змінено верхній відступ */
 }
 
 .status-messages-container {
@@ -147,6 +149,7 @@ h1 {
 .upload-indicator {
   font-size: 0.9rem;
   color: #d63384; /* Рожевий колір, як у заголовка */  
+  margin-top: 5px; /* Додано/змінено верхній відступ */
   text-align: center;
 }
 
@@ -181,8 +184,8 @@ h1 {
   display: flex; /* Встановлюємо flex-контейнер для розташування елементів в ряд */
   align-items: center; /* Вирівнюємо елементи по центру вертикально */
   gap: 10px; /* Проміжок між блоком пісень та регулятором гучності */
-  margin-top: 10px; /* Відступ зверху від чат-боксу */
-  margin-bottom: 5px; /* Зменшений відступ знизу перед полем вводу */
+  margin-top: 5px; /* Зменшено верхній відступ */
+  margin-bottom: 0px; /* Прибрано нижній відступ */
 }
 
 .items {
@@ -310,7 +313,7 @@ h1 {
   display: flex;
   align-items: center; /* Вирівнюємо елементи по вертикалі */
   gap: 8px; /* Проміжок між елементами */
-  margin-top: 5px; /* Відступ зверху */
+  margin-top: 5px; /* Зменшено верхній відступ */
   margin-bottom: 0px; /* Прибираємо відступ знизу, щоб наблизити до блоку статусів */
   position: relative; /* Важливо для позиціонування панелі емодзі */
 }
