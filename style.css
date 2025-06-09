@@ -867,6 +867,13 @@ h1 {
   word-break: break-word;  /* Додатково для кращого переносу слів, хоча це вже є на .message */
 }
 
+.message-edited-indicator {
+  font-style: italic;
+  color: #a7a7a7; /* Сірий колір, схожий на індикатор набору тексту */
+  font-size: 0.65rem; /* Малий розмір шрифту, трохи збільшено для тесту */
+  margin-left: 5px; /* Невеликий відступ зліва для відокремлення */
+}
+
 .message-reply-quote {
   background-color: rgba(0, 0, 0, 0.05); /* Трохи темніший фон для цитати */
   padding: 5px 8px;

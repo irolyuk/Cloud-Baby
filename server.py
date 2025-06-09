@@ -9,15 +9,29 @@ socketio = SocketIO(app, cors_allowed_origins="*", max_http_buffer_size=10 * 102
 
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
+current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
 
 @socketio.on('connect')
 def handle_connect():
-    pass  # Очікуємо нікнейм окремо
+    # При підключенні нового клієнта, надсилаємо йому поточний стан музики
+    global current_global_track
+    if current_global_track:
+        emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
+    else:
+        emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
+    # Решта логіки підключення (наприклад, очікування 'register') залишається
 
 @socketio.on('register')
 def handle_register(nickname):
+    global current_global_track # Доступ до глобальної змінної
     users[request.sid] = nickname
     emit("users_online", list(users.values()), broadcast=True)
+    # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
+    # (це для надійності, хоча emit в 'connect' має спрацювати)
+    if current_global_track:
+        emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
+    else:
+        emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -96,6 +110,30 @@ def handle_edit_message(data):
             return
     # Якщо повідомлення не знайдено або не може бути відредаговано
     emit('action_error', {'message': 'Повідомлення для редагування не знайдено або не може бути змінено.'}, to=user_sid)
+
+@socketio.on('control_global_music')
+def handle_control_global_music(data):
+    global current_global_track
+    action = data.get('action')
+    audiosrc = data.get('audiosrc') # audiosrc потрібен для 'play' та 'stop_after_ended'
+
+    if action == 'play' and audiosrc:
+        current_global_track = {'audiosrc': audiosrc}
+        emit('update_global_music_state', {'status': 'playing', 'audiosrc': audiosrc}, broadcast=True)
+    elif action == 'stop':
+        current_global_track = None
+        emit('update_global_music_state', {'status': 'stopped'}, broadcast=True)
+    elif action == 'stop_after_ended' and audiosrc:
+        # Зупиняємо, тільки якщо це дійсно поточний трек, який закінчився
+        if current_global_track and current_global_track['audiosrc'] == audiosrc:
+            current_global_track = None
+            emit('update_global_music_state', {'status': 'stopped'}, broadcast=True)
+
+# Можливо, знадобиться обробник для явного запиту стану музики,
+# але логіка в 'connect' та 'register' має покривати більшість випадків.
+# @socketio.on('get_current_music_state')
+# def handle_get_current_music_state():
+#     # ... логіка надсилання поточного стану, схожа на ту, що в 'connect' ...
 
 @app.route('/')
 def index():
