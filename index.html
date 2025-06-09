@@ -216,13 +216,33 @@
         transports: ["websocket"]
       });
 
-      // chat вже оголошено глобально
-      socket.emit("register", selectedNickname); // передаємо нік
+      // Додаємо обробники подій життєвого циклу сокета
+      socket.on('connect', () => {
+        console.log('Клієнт: Socket.IO підключено успішно!');
+        // Після успішного підключення, реєструємо користувача
+        socket.emit("register", selectedNickname); 
+        // Запит історії чату
+        socket.emit("get_history");
+        // Сервер і так надсилає стан тамагочі при 'connect' та 'register',
+        // тому явний запит тут може бути не потрібен, але не завадить для діагностики, якщо є така подія на сервері.
+        // socket.emit('get_tamagotchi_state'); // Якщо така подія існує
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.warn('Клієнт: Socket.IO відключено. Причина:', reason);
+        // Можна додати логіку для сповіщення користувача або спроби перепідключення
+        // if (reason === 'io server disconnect') {
+        //   socket.connect(); // Спроба перепідключення, якщо сервер розірвав з'єднання
+        // }
+      });
+
+      socket.on('connect_error', (err) => {
+        console.error('Клієнт: Помилка підключення Socket.IO:', err.message, err);
+      });
 
       // Робимо секцію Тамагочі видимою та відображаємо початковий стан
       tamagotchiArea.style.display = 'block';
       renderTamagotchi(null); 
-
 
       socket.on("message", (data) => { // Обробник нових повідомлень
         const messageElement = renderMessage(data); 
@@ -330,14 +350,13 @@
       });
 
       socket.on('update_tamagotchi_state', (state) => {
+        console.log('Клієнт: отримано update_tamagotchi_state:', state); // Додано лог
         renderTamagotchi(state);
       });
 
       // Запит початкового стану тамагочі (сервер надсилає його при connect/register)
       // або можна додати кнопку "Перевірити стан Хмаринки"
 
-
-      socket.emit("get_history");
 
       // msgInput вже оголошено глобально
       let typingTimeout;
@@ -855,6 +874,7 @@
 
     // --- Tamagotchi Functions ---
     function renderTamagotchi(state) { // state може бути null спочатку
+      console.log('Клієнт: renderTamagotchi викликано зі станом:', state); // Додано лог
       tamagotchiArea.style.display = 'block'; // Переконуємося, що область видима
 
       if (state && state.is_alive) { // Тамагочі існує і живий

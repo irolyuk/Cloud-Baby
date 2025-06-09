@@ -42,7 +42,7 @@ def handle_connect():
 
 @socketio.on('register')
 def handle_register(nickname):
-    global current_global_track # Доступ до глобальної змінної
+    global current_global_track, tamagotchi_timer # Доступ до глобальних змінних
     users[request.sid] = nickname
     emit("users_online", list(users.values()), broadcast=True)
     # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
@@ -197,13 +197,13 @@ def update_tamagotchi_passively():
     if tamagotchi_state["hunger"] == 0 or tamagotchi_state["happiness"] == 0:
         tamagotchi_state["is_alive"] = False
         print(f"[{current_timestamp}] {tamagotchi_state['name']} is no longer alive due to low stats.")
-        socketio.emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+        socketio.emit('update_tamagotchi_state', tamagotchi_state) # broadcast=True не потрібен тут
         if tamagotchi_timer:
             tamagotchi_timer.cancel()
             tamagotchi_timer = None
         return
     
-    socketio.emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
+    socketio.emit('update_tamagotchi_state', tamagotchi_state) # broadcast=True не потрібен тут
     print(f"[{current_timestamp}] Emitted update_tamagotchi_state.")
     
     # Перезапускаємо таймер
