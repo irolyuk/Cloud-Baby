@@ -20,7 +20,6 @@ history = []
 current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
 
 # --- Тамагочі ---
-tamagotchi_state = None
 tamagotchi_timer = None
 TICK_INTERVAL = 20 # Тимчасово кожні 20 секунд для тестування
 
@@ -31,6 +30,9 @@ DEFAULT_TAMAGOTCHI_STATE = {
     "is_alive": True,
     "last_interaction_time": time.time() # Час останньої взаємодії або оновлення
 }
+# Ініціалізуємо стан Тамагочі при старті сервера
+tamagotchi_state = DEFAULT_TAMAGOTCHI_STATE.copy()
+
 
 @socketio.on('connect')
 def handle_connect():
