@@ -536,14 +536,21 @@
     function sendMessage() {
       // msgInput вже оголошено глобально
       const msg = msgInput.value.trim();
-      if (msg && socket) {
+      // ЛОГ 1: Чи викликається ця функція? Який стан сокета і повідомлення?
+      console.log("Клієнт: sendMessage() викликано. Повідомлення:", msg, "Socket підключено:", socket && socket.connected);
+      if (socket && socket.connected && msg) { // Додано перевірку socket.connected
         const messagePayload = { type: 'text', text: msg };
         if (currentReplyInfo) {
           messagePayload.replyTo = currentReplyInfo;
         }
+        // ЛОГ 2: Чи збираємося ми надсилати дані?
+        console.log("Клієнт: Намагаюся надіслати 'message':", messagePayload);
         socket.emit("message", messagePayload);
         cancelReply(); 
         msgInput.value = "";
+      } else {
+        // ЛОГ 3: Чому не надсилаємо?
+        console.log("Клієнт: Не надсилаю 'message'. Socket підключено:", socket && socket.connected, "Повідомлення порожнє:", !msg);
       }
     }
 
@@ -918,11 +925,26 @@
     }
 
     initTamagotchiBtn.addEventListener('click', () => {
-      socket.emit('initialize_tamagotchi');
+      console.log("Клієнт: initTamagotchiBtn натиснуто. Socket підключено:", socket && socket.connected);
+      if (socket && socket.connected) {
+        console.log("Клієнт: Намагаюся надіслати 'initialize_tamagotchi'");
+        socket.emit('initialize_tamagotchi');
+      }
     });
-    feedTamagotchiBtn.addEventListener('click', () => socket.emit('tamagotchi_action', { action: 'feed' }));
-    playTamagotchiBtn.addEventListener('click', () => socket.emit('tamagotchi_action', { action: 'play' }));
-
+    feedTamagotchiBtn.addEventListener('click', () => {
+      console.log("Клієнт: feedTamagotchiBtn натиснуто. Socket підключено:", socket && socket.connected);
+      if (socket && socket.connected) {
+        console.log("Клієнт: Намагаюся надіслати 'tamagotchi_action' (feed)");
+        socket.emit('tamagotchi_action', { action: 'feed' });
+      }
+    });
+    playTamagotchiBtn.addEventListener('click', () => {
+      console.log("Клієнт: playTamagotchiBtn натиснуто. Socket підключено:", socket && socket.connected);
+      if (socket && socket.connected) {
+        console.log("Клієнт: Намагаюся надіслати 'tamagotchi_action' (play)");
+        socket.emit('tamagotchi_action', { action: 'play' });
+      }
+    });
 
   </script>
 
