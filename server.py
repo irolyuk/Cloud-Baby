@@ -55,12 +55,24 @@ def handle_register(nickname):
     # Також надсилаємо стан Тамагочі після реєстрації
     if tamagotchi_state and tamagotchi_state["is_alive"]:
         emit('update_tamagotchi_state', tamagotchi_state, to=request.sid)
+    
+    # Якщо це перший користувач онлайн і Тамагочі живий, але таймер неактивний, запускаємо його
+    if len(users) == 1 and tamagotchi_state and tamagotchi_state["is_alive"] and not tamagotchi_timer:
+        tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
+        tamagotchi_timer.start()
+        print(f"Tamagotchi timer started as users are now online.")
 
 @socketio.on('disconnect')
 def handle_disconnect():
     if request.sid in users:
         del users[request.sid]
     emit("users_online", list(users.values()), broadcast=True)
+    # Якщо користувачів не залишилося онлайн і таймер Тамагочі активний, зупиняємо його
+    if not users and tamagotchi_timer:
+        tamagotchi_timer.cancel()
+        tamagotchi_timer = None
+        print(f"Tamagotchi timer paused as no users are online.")
+
 
 @socketio.on('message')
 def handle_message(msg):
@@ -160,6 +172,12 @@ def update_tamagotchi_passively():
             tamagotchi_timer.cancel()
             tamagotchi_timer = None
         return
+    
+    if not users: # Якщо немає користувачів онлайн, не оновлюємо стан і зупиняємо таймер
+        if tamagotchi_timer:
+            tamagotchi_timer.cancel()
+            tamagotchi_timer = None
+        return
 
     current_time = time.time()
     # Зменшуємо показники з часом, але не частіше ніж раз на TICK_INTERVAL
@@ -193,11 +211,13 @@ def handle_initialize_tamagotchi():
     tamagotchi_state["last_interaction_time"] = time.time()
     emit('update_tamagotchi_state', tamagotchi_state, broadcast=True)
     print(f"{tamagotchi_state['name']} has been initialized/revived.")
-
-    if tamagotchi_timer:
-        tamagotchi_timer.cancel()
-    tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
-    tamagotchi_timer.start()
+    
+    # Запускаємо таймер, тільки якщо є користувачі онлайн
+    if users:
+        if tamagotchi_timer:
+            tamagotchi_timer.cancel()
+        tamagotchi_timer = threading.Timer(TICK_INTERVAL, update_tamagotchi_passively)
+        tamagotchi_timer.start()
 
 @socketio.on('tamagotchi_action')
 def handle_tamagotchi_action(data):
