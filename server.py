@@ -70,17 +70,7 @@ def handle_register(nickname):
         tamagotchi_timer.start()
         print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi timer STARTED from REGISTER because it's the first user and Tamagotchi is alive.")
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    global tamagotchi_timer # Declare tamagotchi_timer as global
-    if request.sid in users:
-        del users[request.sid]
-    emit("users_online", list(users.values()), broadcast=True)
-    # Якщо користувачів не залишилося онлайн і таймер Тамагочі активний, зупиняємо його
-    if not users and tamagotchi_timer:
-        tamagotchi_timer.cancel()
-        tamagotchi_timer = None
-        print(f"[{time.strftime('%H:%M:%S')}] Tamagotchi timer PAUSED because no users are online.")
+
 
 
 @socketio.on('message')
