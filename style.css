@@ -61,6 +61,7 @@ h1 {
   overflow-y: auto;
   font-size: 1rem;
   max-height: 55vh;
+  position: relative; /* Для позиціонування індикатора набору тексту, якщо знадобиться */
 }
 
 .message {
@@ -76,6 +77,18 @@ h1 {
   font-size: 1rem; /* Зменшуємо розмір шрифту для кращого вигляду */
   animation: fadeIn 0.3s ease;
 }
+
+/* Стилі для індикатора набору тексту всередині чату */
+.typing-message-in-chat {
+  padding: 8px 12px;
+  margin: 5px 10px; /* Відступи схожі на повідомлення */
+  font-style: italic;
+  color: #777; /* Сірий колір тексту */
+  background-color: #f9f9f9; /* Дуже світлий фон */
+  border-radius: 10px; /* Легке закруглення */
+  font-size: 0.9rem;
+}
+
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(10px);}
   to {opacity: 1; transform: translateY(0);}
@@ -127,13 +140,12 @@ h1 {
   width: 100%; /* Займає всю доступну ширину */
   display: flex;
   flex-direction: column; /* Елементи всередині йдуть один під одним */
-  align-items: center; /* Центрує дочірні елементи по горизонталі */
+  align-items: center; /* Центрує дочірні елементи по горизонталі */  
 }
 
 .upload-indicator {
   font-size: 0.9rem;
-  color: #d63384; /* Рожевий колір, як у заголовка */
-  margin-top: 5px;
+  color: #d63384; /* Рожевий колір, як у заголовка */  
   text-align: center;
 }
 
