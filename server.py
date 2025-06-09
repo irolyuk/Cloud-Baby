@@ -21,7 +21,7 @@ current_global_track = None # Зберігає поточний глобальн
 
 # --- Тамагочі ---
 tamagotchi_timer = None
-TICK_INTERVAL = 20 # Тимчасово кожні 20 секунд для тестування
+TICK_INTERVAL = 2 # Тимчасово кожні 2 секунд для тестування
 
 DEFAULT_TAMAGOTCHI_STATE = {
     "name": "Хмаринка",
