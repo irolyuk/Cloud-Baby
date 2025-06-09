@@ -53,7 +53,7 @@
       <button id="cancelReplyBtn" class="cancel-reply-btn">&times;</button>
     </div>
     <div class="input-controls">
-      <textarea class="chat-input" id="msgInput" placeholder="Напиши повідомлення..." rows="1"></textarea>
+      <textarea class="chat-input" id="msgInput" placeholder="Піші уже шось" rows="1"></textarea>
       <button id="emojiToggleBtn" class="emoji-toggle-btn">😊</button>
       <input type="file" id="imageInput" accept="image/*" style="display: none;">
       <button id="attachImageBtn" class="attach-btn">📎</button>
@@ -184,6 +184,9 @@
      "Pink Cloud ☁️": "☁️"
     };
     
+    // Додамо константу для імені Тамагочі за замовчуванням на клієнті
+    const DEFAULT_TAMAGOTCHI_NAME_CLIENT = "Хмаринка";
+
     const userColors = {
      "Baby 😎": "message-baby",
      "Pink Cloud ☁️": "message-cloud"
@@ -215,6 +218,10 @@
 
       // chat вже оголошено глобально
       socket.emit("register", selectedNickname); // передаємо нік
+
+      // Робимо секцію Тамагочі видимою та відображаємо початковий стан
+      tamagotchiArea.style.display = 'block';
+      renderTamagotchi(null); 
 
 
       socket.on("message", (data) => { // Обробник нових повідомлень
@@ -660,7 +667,7 @@
       galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
     });
 
-    const emojis = ['😀', '😂', '😊', '😍', '🤔', '😢', '😠', '👍', '👎', '❤️', '🎉', '✨', '🌸', '☁️', '😎', '🍂', '💖', '🌠', '🤗', '🌌', '😘', '😜', '😇', '🥳', '😭', '🙏', '👀', '👋', '🔥', '💯'];
+    const emojis = ['😀', '😂', '😊', '😍', '🤔', '😢', '😠', '👍', '👎', '❤️', '🖤' , '💚', '💙' , '💛' , '💜' , '🧡' , '🤎' , '🤍' , '🎉', '✨', '🌸', '☁️', '😎', '🍂', '💖', '🌠', '🤗', '🌌', '😘', '😜', '😇', '🥳', '😭', '🙏', '👀', '👋', '💯'];
 
     function populateEmojiPanel() {
       emojis.forEach(emoji => {
@@ -847,25 +854,18 @@
     });
 
     // --- Tamagotchi Functions ---
-    function renderTamagotchi(state) {
-      if (!state) {
-        tamagotchiArea.style.display = 'none';
-        return;
-      }
-      tamagotchiArea.style.display = 'block';
-      tamagotchiNameDisplay.textContent = state.name;
-      tamagotchiHungerDisplay.textContent = state.hunger;
-      tamagotchiHappinessDisplay.textContent = state.happiness;
+    function renderTamagotchi(state) { // state може бути null спочатку
+      tamagotchiArea.style.display = 'block'; // Переконуємося, що область видима
 
-      if (!state.is_alive) {
-        tamagotchiEmojiDisplay.textContent = '👻';
-        feedTamagotchiBtn.style.display = 'none';
-        playTamagotchiBtn.style.display = 'none';
-        initTamagotchiBtn.textContent = `Оживити ${state.name} ✨`;
-      } else {
+      if (state && state.is_alive) { // Тамагочі існує і живий
+        tamagotchiNameDisplay.textContent = state.name;
+        tamagotchiHungerDisplay.textContent = state.hunger;
+        tamagotchiHappinessDisplay.textContent = state.happiness;
+        
         feedTamagotchiBtn.style.display = 'inline-block';
         playTamagotchiBtn.style.display = 'inline-block';
-        initTamagotchiBtn.textContent = `Перезапустити ${state.name} ✨`; // Або приховати, якщо вже живий
+        initTamagotchiBtn.textContent = `Перезапустити ${state.name} ✨`;
+        initTamagotchiBtn.style.display = 'inline-block';
 
         if (state.hunger < 20 || state.happiness < 20) {
           tamagotchiEmojiDisplay.textContent = '😢'; // Дуже сумний/голодний
@@ -876,6 +876,24 @@
         } else {
           tamagotchiEmojiDisplay.textContent = '😊'; // Нормальний стан
         }
+        // Показуємо блоки зі статистикою
+        tamagotchiHungerDisplay.parentElement.style.display = 'block';
+        tamagotchiHappinessDisplay.parentElement.style.display = 'block';
+        tamagotchiEmojiDisplay.style.display = 'block';
+      } else { // Тамагочі не живий або стан null (потребує ініціалізації)
+        const nameToShow = state ? state.name : DEFAULT_TAMAGOTCHI_NAME_CLIENT;
+        tamagotchiNameDisplay.textContent = nameToShow;
+        tamagotchiEmojiDisplay.textContent = '👻';
+        
+        // Приховуємо статистику
+        tamagotchiHungerDisplay.parentElement.style.display = 'none';
+        tamagotchiHappinessDisplay.parentElement.style.display = 'none';
+
+        feedTamagotchiBtn.style.display = 'none';
+        playTamagotchiBtn.style.display = 'none';
+        initTamagotchiBtn.textContent = `Розбудити ${nameToShow} ✨`;
+        initTamagotchiBtn.style.display = 'inline-block';
+        tamagotchiEmojiDisplay.style.display = 'block'; // Переконуємося, що емодзі та ім'я видимі
       }
     }
 
