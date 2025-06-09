@@ -6,8 +6,14 @@ import threading
 import time # Потрібен для відстеження часу
 
 app = Flask(__name__)
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", max_http_buffer_size=10 * 1024 * 1024) # Збільшуємо до 10MB
+CORS(app) # Дозволяє запити з усіх джерел
+
+# Ініціалізація SocketIO зі збільшеними таймаутами для стабільності
+socketio = SocketIO(app,
+cors_allowed_origins="*",
+max_http_buffer_size=10 * 1024 * 1024, # Збільшуємо до 10MB
+ping_timeout=60,    # Час очікування відповіді pong (в секундах)
+ping_interval=25)   # Інтервал надсилання ping (в секундах)
 
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
