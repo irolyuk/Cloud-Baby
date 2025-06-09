@@ -72,6 +72,7 @@ def handle_register(nickname):
 
 @socketio.on('disconnect')
 def handle_disconnect():
+    global tamagotchi_timer # Declare tamagotchi_timer as global
     if request.sid in users:
         del users[request.sid]
     emit("users_online", list(users.values()), broadcast=True)
