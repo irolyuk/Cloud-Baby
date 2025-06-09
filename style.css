@@ -68,6 +68,7 @@ h1 {
   margin: 5px;
   padding: 10px 15px; 
   /* background-color: #f0f0f0;  Прибираємо загальний фон, щоб не конфліктував */
+  position: relative; /* Для позиціонування кнопок дій */
   border-radius: 15px;
   max-width: 85%;               /* ✅ Повідомлення не вилазить */
   word-break: break-word;        /* ✅ Ламає слова */
@@ -76,6 +77,7 @@ h1 {
   box-sizing: border-box;
   font-size: 1rem; /* Зменшуємо розмір шрифту для кращого вигляду */
   animation: fadeIn 0.3s ease;
+  padding-right: 35px; /* Додаємо місце справа для кнопок, щоб текст не залазив під них */
 }
 
 /* Стилі для індикатора набору тексту всередині чату */
@@ -89,6 +91,88 @@ h1 {
   font-size: 0.6rem;
   text-align: center; /* Додаємо для центрування тексту */
   min-height: 1.2em; /* Мінімальна висота, щоб текст не зливався з іншими повідомленнями */
+}
+
+/* Стилі для кнопок дій над повідомленням (Редагувати, Видалити) */
+.message-actions {
+  position: absolute;
+  top: 2px;    /* Відступ зверху від краю повідомлення */
+  right: 2px;  /* Відступ справа від краю повідомлення */
+  display: none; /* Початково приховані */
+  gap: 3px;    /* Проміжок між кнопками */
+  background-color: rgba(255, 255, 255, 0.7); /* Напівпрозорий фон для кращої видимості */
+  padding: 2px 4px;
+  border-radius: 5px;
+  z-index: 1; /* Щоб були поверх тексту повідомлення, якщо текст дуже довгий */
+}
+
+.message:hover .message-actions {
+  display: flex; /* Показувати при наведенні на повідомлення */
+}
+
+.action-btn { /* Загальні стилі для кнопок дій */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem; /* Розмір іконок */
+  padding: 2px;
+  line-height: 1; /* Для кращого вирівнювання іконок */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.edit-btn {
+  color: #007bff; /* Синій для редагування */
+}
+.action-btn.edit-btn:hover {
+  color: #0056b3;
+}
+
+.action-btn.delete-btn {
+  color: #dc3545; /* Червоний для видалення */
+}
+.action-btn.delete-btn:hover {
+  color: #a71d2a;
+}
+
+/* Стилі для поля редагування повідомлення */
+.edit-message-input {
+  width: calc(100% - 10px); /* Займає майже всю ширину повідомлення, враховуючи відступи */
+  padding: 6px 8px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: inherit; /* Успадковує шрифт від батьківського елемента */
+  font-size: inherit;   /* Успадковує розмір шрифту */
+  resize: vertical;     /* Дозволити змінювати висоту textarea */
+  box-sizing: border-box;
+}
+
+/* Кнопки Зберегти/Скасувати під час редагування */
+.message .save-edit-btn, 
+.message .cancel-edit-btn { 
+  margin-top: 5px;
+  margin-right: 5px; /* Відступ справа для першої кнопки */
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.message .save-edit-btn {
+  background-color: #28a745; /* Зелений для збереження */
+}
+.message .save-edit-btn:hover {
+  background-color: #1e7e34;
+}
+.message .cancel-edit-btn {
+  background-color: #6c757d; /* Сірий для скасування */
+  margin-left: 5px; /* Додаємо відступ зліва для другої кнопки */
+}
+.message .cancel-edit-btn:hover {
+  background-color: #545b62;
 }
 
 @keyframes fadeIn {

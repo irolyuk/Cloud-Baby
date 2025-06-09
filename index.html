@@ -131,6 +131,7 @@
       socket.on("message", (data) => {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message");
+        messageDiv.dataset.messageId = data.messageId; // Додаємо ID повідомлення
 
         const colorClass = userColors[data.user];
         if (colorClass) messageDiv.classList.add(colorClass);
@@ -150,6 +151,29 @@
           messageDiv.appendChild(img);
         } else {
           messageDiv.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
+        }
+
+        // Додаємо кнопки дій, якщо повідомлення належить поточному користувачеві
+        if (data.user === selectedNickname) {
+          const actionsDiv = document.createElement("div");
+          actionsDiv.classList.add("message-actions");
+
+          const editButton = document.createElement("button");
+          editButton.classList.add("action-btn", "edit-btn", "tooltip");
+          editButton.innerHTML = "&#9998;"; // Іконка олівця
+          editButton.title = "Редагувати";
+          editButton.onclick = () => startEditMessage(data.messageId, messageDiv, data.type === 'text' ? data.text : null);
+          if (data.type !== 'text') editButton.style.display = 'none'; // Редагуємо тільки текст
+
+          const deleteButton = document.createElement("button");
+          deleteButton.classList.add("action-btn", "delete-btn", "tooltip");
+          deleteButton.innerHTML = "&#128465;"; // Іконка кошика
+          deleteButton.title = "Видалити";
+          deleteButton.onclick = () => deleteMessage(data.messageId);
+          
+          actionsDiv.appendChild(deleteButton); // Спочатку кнопка видалення
+          actionsDiv.appendChild(editButton);   // Потім кнопка редагування
+          messageDiv.appendChild(actionsDiv);
         }
 
         chat.appendChild(messageDiv);
@@ -281,6 +305,7 @@
     function renderMessage(data) {
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
+      messageDiv.dataset.messageId = data.messageId; // Додаємо ID повідомлення
       const colorClass = userColors[data.user];
       if (colorClass) messageDiv.classList.add(colorClass);
 
@@ -290,11 +315,38 @@
         img.alt = "Зображення від " + data.user;
         img.classList.add('chat-image-thumbnail');
         img.onclick = () => displayChatImageFull(data.image);
-        messageDiv.appendChild(document.createTextNode(`${avatars[data.user] || "👤"} ${data.user}: `));
+        const senderInfo = document.createElement('span');
+        senderInfo.textContent = `${avatars[data.user] || "👤"} ${data.user}: `;
+        senderInfo.classList.add('message-sender'); // Додаємо клас для можливої стилізації
+        messageDiv.appendChild(senderInfo);
         messageDiv.appendChild(img);
       } else {
         messageDiv.textContent = `${avatars[data.user] || "👤"} ${data.user}: ${data.text}`;
       }
+
+       // Додаємо кнопки дій, якщо повідомлення належить поточному користувачеві
+      if (data.user === selectedNickname) {
+        const actionsDiv = document.createElement("div");
+        actionsDiv.classList.add("message-actions");
+
+        const editButton = document.createElement("button");
+        editButton.classList.add("action-btn", "edit-btn", "tooltip");
+        editButton.innerHTML = "&#9998;"; 
+        editButton.title = "Редагувати";
+        editButton.onclick = () => startEditMessage(data.messageId, messageDiv, data.type === 'text' ? data.text : null);
+        if (data.type !== 'text') editButton.style.display = 'none'; 
+        
+        const deleteButton = document.createElement("button");
+        deleteButton.classList.add("action-btn", "delete-btn", "tooltip");
+        deleteButton.innerHTML = "&#128465;"; 
+        deleteButton.title = "Видалити";
+        deleteButton.onclick = () => deleteMessage(data.messageId);
+
+        actionsDiv.appendChild(deleteButton); // Спочатку кнопка видалення
+        actionsDiv.appendChild(editButton);   // Потім кнопка редагування
+        messageDiv.appendChild(actionsDiv); 
+      }
+
       chat.appendChild(messageDiv);
     }
 
@@ -538,6 +590,159 @@
       }
     });
     populateEmojiPanel(); // Заповнюємо панель емодзі при завантаженні
+
+    // --- Редагування та Видалення Повідомлень ---
+    if (socket) { // Переконуємося, що socket ініціалізований
+      socket.on('message_edited', (data) => {
+        const messageDiv = document.querySelector(`.message[data-message-id="${data.messageId}"]`);
+        if (messageDiv && data.user === selectedNickname) { // Перевіряємо, чи це повідомлення поточного користувача
+          // Оновлюємо текстовий вміст.
+          const userPrefix = `${avatars[data.user] || "👤"} ${data.user}: `;
+          let textNodeToUpdate = null;
+          for (const child of messageDiv.childNodes) {
+              // Шукаємо текстовий вузол, який не є .message-sender або .message-actions
+              if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== '') {
+                  textNodeToUpdate = child;
+                  break;
+              }
+          }
+          if (textNodeToUpdate) {
+              textNodeToUpdate.textContent = userPrefix + data.newText;
+          } else if (!messageDiv.querySelector('img')) { 
+             // Якщо це було чисто текстове повідомлення, і ми не знайшли конкретний вузол,
+             // спробуємо оновити textContent, але це може видалити інші дочірні елементи (наприклад, кнопки).
+             // Тому цей випадок потребує обережності.
+             // Для простоти, припустимо, що текстовий вузол завжди є.
+             // Якщо його немає, можливо, потрібно буде відновити структуру повідомлення.
+             // Поки що, якщо textNodeToUpdate не знайдено, нічого не робимо, щоб уникнути помилок.
+             console.warn("Не вдалося знайти текстовий вузол для оновлення в message_edited для:", messageDiv);
+          }
+        } else if (messageDiv) {
+            // Якщо повідомлення не поточного користувача, але воно оновилося (наприклад, адміном)
+            // Тут можна додати логіку оновлення для інших користувачів, якщо потрібно
+            const userPrefix = `${avatars[data.user] || "👤"} ${data.user}: `;
+            let textNodeToUpdate = null;
+            for (const child of messageDiv.childNodes) {
+                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== '') {
+                    textNodeToUpdate = child;
+                    break;
+                }
+            }
+            if (textNodeToUpdate) {
+                textNodeToUpdate.textContent = userPrefix + data.newText;
+            }
+        }
+      });
+
+      socket.on('message_deleted', (data) => {
+        const messageDiv = document.querySelector(`.message[data-message-id="${data.messageId}"]`);
+        if (messageDiv) {
+          messageDiv.remove();
+        }
+      });
+    }
+
+    function deleteMessage(messageId) {
+      if (confirm("Ви впевнені, що хочете видалити це повідомлення?")) {
+        if (socket) {
+          socket.emit('delete_message', { messageId });
+        }
+      }
+    }
+
+    function startEditMessage(messageId, messageDiv, currentText) {
+      if (!currentText) return; 
+      
+      // Перевіряємо, чи вже не йде редагування цього повідомлення
+      if (messageDiv.querySelector('.edit-message-input')) {
+        return;
+      }
+
+      let originalTextNode = null;
+      const userPrefix = `${avatars[selectedNickname] || "👤"} ${selectedNickname}: `;
+      const expectedTextContent = userPrefix + currentText;
+
+      for (const child of messageDiv.childNodes) {
+        if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() === expectedTextContent.trim()) {
+          originalTextNode = child;
+          break;
+        }
+      }
+
+      if (!originalTextNode) {
+        // Спробуємо знайти текстовий вузол, що містить currentText, якщо точне співпадіння не знайдено
+        // Це може бути корисно, якщо форматування тексту змінилося (наприклад, зайві пробіли)
+        for (const child of messageDiv.childNodes) {
+            if (child.nodeType === Node.TEXT_NODE && child.textContent.includes(currentText)) {
+                originalTextNode = child;
+                // Оновлюємо currentText до фактичного тексту з вузла без префіксу
+                currentText = child.textContent.substring(userPrefix.length).trim();
+                break;
+            }
+        }
+        if (!originalTextNode) {
+            console.error("Не вдалося знайти текстовий вузол для редагування в:", messageDiv, "Очікуваний текст:", currentText);
+            return; 
+        }
+      }
+      
+      const actionsDiv = messageDiv.querySelector('.message-actions');
+      let actionsWereVisible = false;
+      if (actionsDiv) {
+        actionsWereVisible = getComputedStyle(actionsDiv).display !== 'none';
+        actionsDiv.style.display = 'none';
+      }
+
+      const input = document.createElement('textarea');
+      input.classList.add('edit-message-input');
+      input.value = currentText; // Використовуємо текст без префіксу
+      input.rows = Math.max(1, Math.min(5, (currentText.match(/\n/g) || []).length + 1)); 
+      input.onkeydown = (e) => { 
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          saveButton.click();
+        } else if (e.key === 'Escape') {
+          cancelButton.click();
+        }
+      };
+      
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Зберегти';
+      saveButton.classList.add('action-btn', 'save-edit-btn');
+      saveButton.onclick = () => {
+        const newText = input.value.trim();
+        // Відновлюємо вигляд перед відправкою на сервер, щоб уникнути подвійного оновлення
+        // або якщо сервер не відповість
+        messageDiv.replaceChild(originalTextNode, input);
+        originalTextNode.textContent = userPrefix + (newText || currentText); // Оновлюємо текст одразу
+        messageDiv.removeChild(saveButton);
+        messageDiv.removeChild(cancelButton);
+        if (actionsDiv && actionsWereVisible) actionsDiv.style.display = 'flex';
+
+        if (newText && newText !== currentText) {
+          if (socket) {
+            socket.emit('edit_message', { messageId, newText });
+          }
+        }
+      };
+
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Скасувати';
+      cancelButton.classList.add('action-btn', 'cancel-edit-btn');
+      cancelButton.onclick = () => {
+        messageDiv.replaceChild(originalTextNode, input);
+        // originalTextNode.textContent залишається без змін (або можна відновити userPrefix + currentText)
+        messageDiv.removeChild(saveButton);
+        messageDiv.removeChild(cancelButton);
+        if (actionsDiv && actionsWereVisible) actionsDiv.style.display = 'flex';
+      };
+
+      messageDiv.replaceChild(input, originalTextNode);
+      input.insertAdjacentElement('afterend', cancelButton);
+      input.insertAdjacentElement('afterend', saveButton);
+      input.focus();
+      input.select(); // Виділяємо текст для зручності редагування
+    }
   </script>
 
 </body>
