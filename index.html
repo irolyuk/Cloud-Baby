@@ -29,8 +29,23 @@
     <div id="chat" class="chat-box"></div>
     <!-- Новий контейнер для індикатора набору тексту всередині чату -->
     <div id="chatTypingIndicator" class="typing-message-in-chat" style="visibility: hidden;"></div>
-     <div class="media-controls-area">
-      <!-- ... кнопки музики та гучності ... -->
+    <div class="media-controls-area">
+      <!-- Припускаємо, що тут можуть бути кнопки для вибору музики, якщо вони є -->
+      <div class="items">
+        <!-- Приклад кнопки музики, додайте свої, якщо потрібно -->
+        <!-- <button class="item-btn" onclick="playMusic('audio/your-song.mp3', this)">🎵 Назва Пісні</button> -->
+        <button class="item-btn" onclick="playMusic('audio/Autumn-love.m4a', this)">🍂Любов як осінь🍂</button>
+        <button class="item-btn" onclick="playMusic('audio/Bounty.mp3', this)">💖Bounty💖</button>
+        <button class="item-btn" onclick="playMusic('audio/Drevo.mp3', this)">🌠Смарагдове небо🌠</button>
+        <button class="item-btn" onclick="playMusic('audio/MBreeze.mp3', this)">🤗Кожен день🤗</button>
+        <button class="item-btn" onclick="playMusic('audio/SoulScream.mp3', this)">🥰Крик в пустоту🥰</button>
+        <button class="item-btn" onclick="playMusic('audio/WhenYouSmile.mp3', this)">😍Коли ти посміхаєшся😍</button>
+        <button class="item-btn" onclick="playMusic('audio/song7.mp3', this)">🎵 Пісня 7</button> 
+      </div>
+      <div class="volume-control">
+        <button id="volumeToggleButton" class="item-btn">🔊</button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.5" style="display: none;">
+      </div>
     </div>
     <!-- Блок для відображення попереднього перегляду відповіді - ПЕРЕМІЩЕНО СЮДИ -->
     <div id="replyPreview" class="reply-preview" style="display: none;">
@@ -75,12 +90,54 @@
   <script>
     let selectedNickname = null;
     let socket = null;
-    // Оголошуємо плеєр та пов'язані змінні тут, щоб вони були глобально доступні в межах скрипта
+    // Player and related variables
     const musicPlayer = new Audio();
     let currentPlayingButton = null;
     let currentReplyInfo = null; // Для зберігання інформації про повідомлення, на яке відповідаємо
-    let currentSongSrc = null;
+    let currentaudiorc = null;
 
+    // DOM Element References - Initialized once the script loads
+    // Login Screen
+    const loginScreen = document.getElementById('loginScreen');
+    const passwordInput = document.getElementById('passwordInput');
+    const nicknameSelection = document.getElementById('nicknameSelection');
+    const loginButton = document.getElementById('loginButton'); 
+    const loginError = document.getElementById('loginError');
+    const chatContainer = document.getElementById('chatContainer');
+
+    // Chat Area
+    const chat = document.getElementById('chat');
+    const chatTypingIndicator = document.getElementById('chatTypingIndicator');
+    const msgInput = document.getElementById('msgInput');
+    const emojiToggleBtn = document.getElementById('emojiToggleBtn');
+    const imageInput = document.getElementById('imageInput');
+    const attachImageBtn = document.getElementById('attachImageBtn');
+    const emojiPanel = document.getElementById('emojiPanel');
+    const usersOnlineDiv = document.getElementById('users-online');
+    const imageUploadIndicator = document.getElementById('imageUploadIndicator');
+
+    // Reply Functionality
+    const replyPreviewDiv = document.getElementById('replyPreview');
+    const replyPreviewUser = document.getElementById('replyPreviewUser');
+    const replyPreviewText = document.getElementById('replyPreviewText');
+    const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+
+    // Modals and Gallery
+    const openGalleryBtn = document.getElementById('openGalleryBtn');
+    const closeGalleryBtn = document.getElementById('closeGalleryBtn');
+    const imageGalleryModal = document.getElementById('imageGalleryModal');
+    const galleryImagesContainer = document.getElementById('galleryImagesContainer');
+    const prevImageBtn = document.getElementById('prevImageBtn');
+    const nextImageBtn = document.getElementById('nextImageBtn');
+    const chatImageDisplayModal = document.getElementById('chatImageDisplayModal');
+    const chatDisplayImage = document.getElementById('chatDisplayImage'); 
+    const closeChatImageDisplayModalBtn = document.getElementById('closeChatImageDisplayModalBtn');
+
+    // Media Controls
+    const volumeToggleButton = document.getElementById('volumeToggleButton');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    // Global Constants
     const avatars = {
      "Baby 😎": "😎",
      "Pink Cloud ☁️": "☁️"
@@ -92,22 +149,21 @@
     };
 
     function checkPassword() {
-      const password = document.getElementById('passwordInput').value;
-      const loginButton = document.getElementById('loginButton');
-      if (password === "26060512") {
-        document.getElementById('nicknameSelection').style.display = "block";
-  passwordInput.style.display = "none"; // Приховуємо поле пароля
-  loginButton.style.display = "none";   // Приховуємо кнопку "Увійти"
-  document.getElementById('loginError').textContent = "";
+      const passwordValue = passwordInput.value; // Використовуємо глобальну змінну
+      if (passwordValue === "26060512") {
+        nicknameSelection.style.display = "block"; // Використовуємо глобальну змінну
+        passwordInput.style.display = "none"; 
+        loginButton.style.display = "none";   // Використовуємо глобальну змінну
+        loginError.textContent = ""; // Використовуємо глобальну змінну
       } else {
-        document.getElementById('loginError').textContent = "Неправильний пароль.";
+        loginError.textContent = "Неправильний пароль."; // Використовуємо глобальну змінну
       }
     }
 
     function chooseNickname(nick) {
       selectedNickname = nick;
-      document.getElementById('loginScreen').style.display = "none";
-      document.getElementById('chatContainer').style.display = "flex";
+      loginScreen.style.display = "none"; // Використовуємо глобальну змінну
+      chatContainer.style.display = "flex"; // Використовуємо глобальну змінну
       startChat();
     }
 
@@ -116,12 +172,12 @@
         transports: ["websocket"]
       });
 
-      const chat = document.getElementById('chat'); // Explicitly define chat
+      // chat вже оголошено глобально
       socket.emit("register", selectedNickname); // передаємо нік
 
 
       socket.on("message", (data) => { // Обробник нових повідомлень
-        const messageElement = renderMessage(data); // Використовуємо renderMessage для створення елемента
+        const messageElement = renderMessage(data); 
         chat.appendChild(messageElement);
         scrollToBottom();
       });
@@ -131,15 +187,14 @@
         if (messageDiv) {
           const textContentElement = messageDiv.querySelector('.message-text-content');
           if (textContentElement) {
-            textContentElement.textContent = data.newText; // Оновлюємо тільки текст
+            textContentElement.textContent = data.newText; 
 
-            // Додаємо або оновлюємо позначку "(відредаговано)"
             let editedMark = messageDiv.querySelector('.edited-indicator');
             if (!editedMark) {
               editedMark = document.createElement('span');
               editedMark.classList.add('edited-indicator');
-              editedMark.style.fontSize = '0.8em'; // Трохи менший шрифт для позначки
-              editedMark.style.marginLeft = '5px'; // Невеликий відступ
+              editedMark.style.fontSize = '0.8em'; 
+              editedMark.style.marginLeft = '5px'; 
               editedMark.textContent = '(відредаговано)';
               textContentElement.insertAdjacentElement('afterend', editedMark);
             }
@@ -154,16 +209,16 @@
         }
       });
 
-      socket.on("chat_history", (messages) => { // Оновлено для обробки зображень в історії
+      socket.on("chat_history", (messages) => { 
         messages.forEach(data => {
-          const messageElement = renderMessage(data); // renderMessage тепер повертає елемент
+          const messageElement = renderMessage(data); 
           chat.appendChild(messageElement);
         });
         scrollToBottom();
       });
 
       socket.on("users_online", (users) => {
-        const usersOnlineDiv = document.getElementById('users-online');
+        // usersOnlineDiv вже оголошено глобально
         let displayString = "";
 
         const hasBaby = users.includes("Baby 😎");
@@ -187,22 +242,21 @@
       });
 
       socket.on("typing", (data) => {
-        const chatTypingIndicator = document.getElementById("chatTypingIndicator"); // Новий індикатор
+        // chatTypingIndicator вже оголошено глобально
         if (data.typing) {          
-          const userAvatar = avatars[data.user] || "👤"; // Визначаємо userAvatar тут
+          const userAvatar = avatars[data.user] || "👤"; 
           chatTypingIndicator.textContent = `${userAvatar} ${data.user} шось там цікавеньке пише...люблячи тебе дуже сильно!`;
           chatTypingIndicator.style.visibility = 'visible';
-          scrollToBottom(); // Прокрутити вниз, щоб було видно індикатор
+          scrollToBottom(); 
         } else {
           chatTypingIndicator.style.visibility = 'hidden';
-          // chatTypingIndicator.textContent = '\u00A0'; // Можна додати нерозривний пробіл, щоб гарантувати висоту, якщо min-height не спрацює
         }
       });
 
 
       socket.emit("get_history");
 
-      const msgInput = document.getElementById("msgInput");
+      // msgInput вже оголошено глобально
       let typingTimeout;
 
       msgInput.addEventListener("input", () => {
@@ -222,26 +276,25 @@
 
       document.querySelector(".chat-button").addEventListener("click", () => sendMessage());
       
-      const attachImageBtn = document.getElementById('attachImageBtn');
-      const imageInput = document.getElementById('imageInput');
+      // attachImageBtn та imageInput вже оголошені глобально
 
       attachImageBtn.addEventListener('click', () => {
-        imageInput.click(); // Відкрити діалог вибору файлу
+        imageInput.click(); 
       });
 
       imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file && file.type.startsWith('image/')) {
-          const uploadIndicator = document.getElementById('imageUploadIndicator');
-          uploadIndicator.style.display = 'block'; // Показати індикатор
+          // imageUploadIndicator вже оголошено глобально
+          imageUploadIndicator.style.display = 'block'; 
 
           const reader = new FileReader();
           reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
               const canvas = document.createElement('canvas');
-              const MAX_WIDTH = 800; // Максимальна ширина
-              const MAX_HEIGHT = 600; // Максимальна висота
+              const MAX_WIDTH = 800; 
+              const MAX_HEIGHT = 600; 
               let width = img.width;
               let height = img.height;
 
@@ -261,49 +314,51 @@
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
 
-              // Отримуємо стиснене зображення як JPEG з якістю 0.9 (можна змінювати)
               const compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.9); 
 
               socket.emit("message", { type: 'image', image: compressedImageDataUrl }, () => {
-                uploadIndicator.style.display = 'none';
+                imageUploadIndicator.style.display = 'none';
               });
             }
-            img.src = e.target.result; // Завантажуємо оригінальне зображення для обробки
+            img.src = e.target.result; 
           }
           reader.readAsDataURL(file);
-          imageInput.value = ''; // Скидаємо значення інпуту, щоб можна було вибрати той самий файл знову
-        } else if (file) { // Якщо файл вибрано, але це не зображення
+          imageInput.value = ''; 
+        } else if (file) { 
             alert("Будь ласка, виберіть файл зображення (JPEG, PNG, GIF).");
-            uploadIndicator.style.display = 'none'; // Приховати індикатор, якщо файл не підходить
+            imageUploadIndicator.style.display = 'none'; 
         }
       });
     }
 
-    // Функція для рендерингу повідомлення (текст або зображення)
     function renderMessage(data) {
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
-      messageDiv.dataset.messageId = data.messageId; // Додаємо ID повідомлення
+      messageDiv.dataset.messageId = data.messageId; 
       const colorClass = userColors[data.user];
       if (colorClass) messageDiv.classList.add(colorClass);
 
-      // Відображення цитованого повідомлення, якщо воно є
       if (data.replyTo) {
         const replyQuoteDiv = document.createElement('div');
         replyQuoteDiv.classList.add('message-reply-quote');
         
         const originalSender = document.createElement('strong');
         originalSender.textContent = data.replyTo.user;
+        // Додаємо клас для кольору імені в цитаті
+        if (data.replyTo.user === "Baby 😎") {
+            originalSender.classList.add('reply-quote-user-baby-color');
+        } else if (data.replyTo.user === "Pink Cloud ☁️") {
+            originalSender.classList.add('reply-quote-user-cloud-color');
+        }
         
         const originalText = document.createElement('span');
-        originalText.textContent = `: ${data.replyTo.text}`; // Текст цитати
+        originalText.textContent = `: ${data.replyTo.text}`; 
 
         replyQuoteDiv.appendChild(originalSender);
         replyQuoteDiv.appendChild(originalText);
         
-        // Додаємо можливість клікнути для переходу до оригінального повідомлення
         replyQuoteDiv.onclick = () => scrollToMessage(data.replyTo.messageId);
-        messageDiv.appendChild(replyQuoteDiv); // Додаємо блок цитати ПЕРЕД основним вмістом
+        messageDiv.appendChild(replyQuoteDiv); 
       }
 
       if (data.type === 'image' && data.image) {
@@ -314,17 +369,16 @@
         img.onclick = () => displayChatImageFull(data.image);
         const senderInfo = document.createElement('span');
         senderInfo.textContent = `${avatars[data.user] || "👤"} ${data.user}: `;
-        senderInfo.classList.add('message-sender', 'message-sender-image'); // Додаємо ОБИДВА класи
+        senderInfo.classList.add('message-sender', 'message-sender-image'); 
         messageDiv.appendChild(senderInfo);
         messageDiv.appendChild(img);
       } else {
-        // Створюємо окремі елементи для відправника та тексту
         const senderInfo = document.createElement('span');
         senderInfo.textContent = `${avatars[data.user] || "👤"} ${data.user}: `;
         senderInfo.classList.add('message-sender');
 
         const textContent = document.createElement('span');
-        textContent.classList.add('message-text-content'); // Клас для легкого доступу
+        textContent.classList.add('message-text-content'); 
         textContent.textContent = data.text;
 
         messageDiv.appendChild(senderInfo);
@@ -334,21 +388,18 @@
       const actionsDiv = document.createElement("div");
       actionsDiv.classList.add("message-actions");
 
-      // Визначаємо позицію кнопок (зліва/справа) залежно від автора повідомлення
-      if (data.user === "Baby 😎") { // Повідомлення Baby справа, кнопки зліва від повідомлення
+      if (data.user === "Baby 😎") { 
         actionsDiv.classList.add("actions-left");
-      } else if (data.user === "Pink Cloud ☁️") { // Повідомлення Cloud зліва, кнопки справа від повідомлення
+      } else if (data.user === "Pink Cloud ☁️") { 
         actionsDiv.classList.add("actions-right");
       }
 
-      // Кнопка "Відповісти" доступна для всіх повідомлень
       const replyButton = document.createElement("button");
       replyButton.classList.add("action-btn", "reply-btn", "tooltip");
-      replyButton.innerHTML = "&#8617;"; // Символ відповіді
+      replyButton.innerHTML = "&#8617;"; 
       replyButton.title = "Відповісти";
       replyButton.onclick = () => startReply(data.messageId, data.user, data.type === 'text' ? data.text : "Зображення");
 
-      // Кнопки "Редагувати" та "Видалити" доступні тільки для власних повідомлень
       if (data.user === selectedNickname) {
         const editButton = document.createElement("button");
         editButton.classList.add("action-btn", "edit-btn", "tooltip");
@@ -363,25 +414,25 @@
         deleteButton.title = "Видалити";
         deleteButton.onclick = () => deleteMessage(data.messageId);
 
-        actionsDiv.appendChild(deleteButton); // Порядок: Видалити, Редагувати, Відповісти
+        actionsDiv.appendChild(deleteButton); 
         actionsDiv.appendChild(editButton);
       }
-      actionsDiv.appendChild(replyButton); // Кнопка "Відповісти" додається завжди (останньою для своїх повідомлень)
+      actionsDiv.appendChild(replyButton); 
       messageDiv.appendChild(actionsDiv);
 
-      return messageDiv; // Повертаємо створений елемент замість додавання його в чат тут
+      return messageDiv; 
     }
 
     function scrollToMessage(messageId) {
       const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
       if (messageElement) {
         messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        messageElement.classList.add('highlight-message'); // Тимчасово підсвітити
+        messageElement.classList.add('highlight-message'); 
         setTimeout(() => messageElement.classList.remove('highlight-message'), 1500);
       }
     }
     function sendMessage() {
-      const msgInput = document.getElementById("msgInput");
+      // msgInput вже оголошено глобально
       const msg = msgInput.value.trim();
       if (msg && socket) {
         const messagePayload = { type: 'text', text: msg };
@@ -389,25 +440,22 @@
           messagePayload.replyTo = currentReplyInfo;
         }
         socket.emit("message", messagePayload);
-        // Очищаємо інформацію про відповідь та ховаємо попередній перегляд
         cancelReply(); 
         msgInput.value = "";
       }
     }
 
     function scrollToBottom() {
-      const chatBox = document.getElementById("chat");
-      chatBox.scrollTop = chatBox.scrollHeight;
+      // chat (chatBox) вже оголошено глобально
+      chat.scrollTop = chat.scrollHeight;
     }
 
-        function playMusic(songSrc, buttonElement) {
-      if (musicPlayer.src.includes(songSrc) && !musicPlayer.paused) {
-        // Та сама пісня грає, ставимо на паузу
+        function playMusic(audiorc, buttonElement) {
+      if (musicPlayer.src.includes(audiorc) && !musicPlayer.paused) {
         musicPlayer.pause();
         buttonElement.classList.remove('playing');
         currentPlayingButton = null;
-      } else if (musicPlayer.src.includes(songSrc) && musicPlayer.paused) {
-        // Та сама пісня на паузі, продовжуємо відтворення
+      } else if (musicPlayer.src.includes(audiorc) && musicPlayer.paused) {
         musicPlayer.play()
           .then(() => {
             if (currentPlayingButton && currentPlayingButton !== buttonElement) {
@@ -418,13 +466,12 @@
           })
           .catch(error => console.error("Помилка продовження аудіо:", error));
       } else {
-        // Нова пісня або інша вибрана
         if (currentPlayingButton) {
           currentPlayingButton.classList.remove('playing');
         }
         
-        musicPlayer.src = songSrc;
-        currentSongSrc = songSrc;
+        musicPlayer.src = audiorc;
+        currentaudiorc = audiorc;
         musicPlayer.play()
           .then(() => {
             buttonElement.classList.add('playing');
@@ -432,7 +479,7 @@
           })
           .catch(error => {
             console.error("Помилка відтворення нового аудіо:", error);
-            currentSongSrc = null;
+            currentaudiorc = null;
           });
       }
     }
@@ -442,12 +489,10 @@
         currentPlayingButton.classList.remove('playing');
         currentPlayingButton = null;
       }
-      currentSongSrc = null;
+      currentaudiorc = null;
     };
 
-    // --- Керування гучністю ---
-    const volumeToggleButton = document.getElementById('volumeToggleButton');
-    const volumeSlider = document.getElementById('volumeSlider');
+    // volumeToggleButton та volumeSlider вже оголошені глобально
 
     function updateVolumeIcon(volume) {
       if (volume === 0) {
@@ -461,10 +506,9 @@
       }
     }
 
-    // Ініціалізація гучності
     let initialVolume = parseFloat(localStorage.getItem('playerVolume'));
     if (isNaN(initialVolume) || initialVolume < 0 || initialVolume > 1) {
-      initialVolume = 0.5; // Гучність за замовчуванням
+      initialVolume = 0.5; 
     }
     musicPlayer.volume = initialVolume;
     volumeSlider.value = initialVolume;
@@ -472,7 +516,7 @@
 
     volumeToggleButton.addEventListener('click', () => {
       if (volumeSlider.style.display === 'none') {
-        volumeSlider.style.display = 'inline-block'; // Або 'block' чи 'flex' залежно від бажаного вигляду
+        volumeSlider.style.display = 'inline-block'; 
       } else {
         volumeSlider.style.display = 'none';
       }
@@ -484,66 +528,41 @@
       localStorage.setItem('playerVolume', this.value);
     });
 
-    // Закривати слайдер гучності, якщо клікнути деінде (опціонально)
-    // document.addEventListener('click', function(event) {
-    //   if (!volumeControl.contains(event.target) && volumeSlider.style.display !== 'none') {
-    //     volumeSlider.style.display = 'none';
-    //   }
-    // });
-
-    // --- Галерея зображень ---
-    const openGalleryBtn = document.getElementById('openGalleryBtn');
-    const closeGalleryBtn = document.getElementById('closeGalleryBtn');
-    const imageGalleryModal = document.getElementById('imageGalleryModal');
-    const galleryImagesContainer = document.getElementById('galleryImagesContainer');
-    const prevImageBtn = document.getElementById('prevImageBtn');
-    const nextImageBtn = document.getElementById('nextImageBtn');
-    const chatDisplayModal = document.getElementById('chatImageDisplayModal');
-    const emojiToggleBtn = document.getElementById('emojiToggleBtn');
-    const emojiPanel = document.getElementById('emojiPanel');
-    const chatDisplayImg = document.getElementById('chatDisplayImage');
-    const closeChatImageDisplayBtn = document.getElementById('closeChatImageDisplayModalBtn');
+    // openGalleryBtn, closeGalleryBtn, imageGalleryModal, galleryImagesContainer,
+    // prevImageBtn, nextImageBtn, chatImageDisplayModal (як chatDisplayModal), 
+    // emojiToggleBtn, emojiPanel, chatDisplayImage (як chatDisplayImg), 
+    // closeChatImageDisplayModalBtn (як closeChatImageDisplayBtn) вже оголошені глобально
 
     function displayChatImageFull(imageSrc) {
-      chatDisplayImg.src = imageSrc;
-      chatDisplayModal.style.display = 'flex';
-      chatDisplayModal.classList.remove('hide');
-      chatDisplayModal.classList.add('show');
+      chatDisplayImage.src = imageSrc; // Використовуємо глобальну змінну
+      chatImageDisplayModal.style.display = 'flex'; // Використовуємо глобальну змінну
+      chatImageDisplayModal.classList.remove('hide');
+      chatImageDisplayModal.classList.add('show');
       document.body.style.overflow = 'hidden';
     }
 
-    if (closeChatImageDisplayBtn) {
-      closeChatImageDisplayBtn.addEventListener('click', () => {
-        chatDisplayModal.classList.remove('show');
-        chatDisplayModal.classList.add('hide');
+    if (closeChatImageDisplayModalBtn) { // Використовуємо глобальну змінну
+      closeChatImageDisplayModalBtn.addEventListener('click', () => {
+        chatImageDisplayModal.classList.remove('show'); // Використовуємо глобальну змінну
+        chatImageDisplayModal.classList.add('hide');
         setTimeout(() => {
-          if (chatDisplayModal.classList.contains('hide')) {
-            chatDisplayModal.style.display = 'none';
+          if (chatImageDisplayModal.classList.contains('hide')) {
+            chatImageDisplayModal.style.display = 'none';
           }
           document.body.style.overflow = 'auto';
-        }, 400); // Час має відповідати тривалості CSS анімації
+        }, 400); 
       });
     }
 
-    // ЗАМІНИ ЦІ ШЛЯХИ НА СВОЇ ЗОБРАЖЕННЯ В ПАПЦІ 'img'
     const galleryImageSources = [
-      'img/1.jpg',
-      'img/2.jpg',
-      'img/3.jpg',
-      'img/4.jpg',
-      'img/5.jpg',
-      'img/6.jpg',
-      'img/7.jpg',
-      'img/8.jpg',
-      'img/9.jpg',
-      'img/10.jpg'
-      // Додай більше шляхів до зображень тут
+      'img/1.jpg', 'img/2.jpg', 'img/3.jpg', 'img/4.jpg', 'img/5.jpg',
+      'img/6.jpg', 'img/7.jpg', 'img/8.jpg', 'img/9.jpg', 'img/10.jpg'
     ];
     let imagesInGalleryLoaded = false;
 
     function populateGallery() {
       if (imagesInGalleryLoaded) return;
-      galleryImagesContainer.innerHTML = ''; // Очистити попередні, якщо є
+      galleryImagesContainer.innerHTML = ''; 
       galleryImageSources.forEach(src => {
         const img = document.createElement('img');
         img.src = src;
@@ -555,24 +574,22 @@
 
     openGalleryBtn.addEventListener('click', () => {
       populateGallery();
-      imageGalleryModal.style.display = 'flex'; // Спочатку робимо блок видимим
-      imageGalleryModal.classList.remove('hide'); // Видалити клас hide, якщо він є
+      imageGalleryModal.style.display = 'flex'; 
+      imageGalleryModal.classList.remove('hide'); 
       imageGalleryModal.classList.add('show');
-      document.body.style.overflow = 'hidden'; // Запобігти прокрутці фону
+      document.body.style.overflow = 'hidden'; 
     });
 
     closeGalleryBtn.addEventListener('click', () => {
       imageGalleryModal.classList.remove('show');
       imageGalleryModal.classList.add('hide');
       
-      // Зачекати завершення анімації перед тим, як приховати елемент і відновити прокрутку
       setTimeout(() => {
-        // Якщо галерея все ще має клас 'hide' (тобто не була відкрита знову під час анімації)
         if (imageGalleryModal.classList.contains('hide')) {
-          imageGalleryModal.style.display = 'none'; // Остаточно приховуємо елемент
+          imageGalleryModal.style.display = 'none'; 
         }
-        document.body.style.overflow = 'auto'; // Відновити прокрутку фону
-      }, 400); // Час має відповідати тривалості анімації fadeOutModal
+        document.body.style.overflow = 'auto'; 
+      }, 400); 
 
     });
 
@@ -584,17 +601,16 @@
       galleryImagesContainer.scrollBy({ left: galleryImagesContainer.clientWidth, behavior: 'smooth' });
     });
 
-    // --- Панель Емодзі ---
     const emojis = ['😀', '😂', '😊', '😍', '🤔', '😢', '😠', '👍', '👎', '❤️', '🎉', '✨', '🌸', '☁️', '😎', '🍂', '💖', '🌠', '🤗', '🌌', '😘', '😜', '😇', '🥳', '😭', '🙏', '👀', '👋', '🔥', '💯'];
 
     function populateEmojiPanel() {
       emojis.forEach(emoji => {
         const emojiSpan = document.createElement('span');
         emojiSpan.textContent = emoji;
-        emojiSpan.setAttribute('role', 'button'); // Для доступності
-        emojiSpan.setAttribute('tabindex', '0');  // Для доступності
+        emojiSpan.setAttribute('role', 'button'); 
+        emojiSpan.setAttribute('tabindex', '0');  
         emojiSpan.addEventListener('click', () => insertEmoji(emoji));
-        emojiSpan.addEventListener('keydown', (e) => { // Для доступності з клавіатури
+        emojiSpan.addEventListener('keydown', (e) => { 
           if (e.key === 'Enter' || e.key === ' ') {
             insertEmoji(emoji);
           }
@@ -604,19 +620,17 @@
     }
 
     function insertEmoji(emoji) {
-      const msgInput = document.getElementById('msgInput');
+      // msgInput вже оголошено глобально
       const start = msgInput.selectionStart;
       const end = msgInput.selectionEnd;
       const text = msgInput.value;
       msgInput.value = text.substring(0, start) + emoji + text.substring(end);
       msgInput.focus();
       msgInput.selectionStart = msgInput.selectionEnd = start + emoji.length;
-      // Можна автоматично ховати панель після вибору:
-      // emojiPanel.style.display = 'none';
     }
 
     emojiToggleBtn.addEventListener('click', (event) => {
-      event.stopPropagation(); // Зупиняємо спливання події, щоб не закрити панель одразу
+      event.stopPropagation(); 
       emojiPanel.style.display = emojiPanel.style.display === 'none' ? 'grid' : 'none';
     });
 
@@ -625,9 +639,7 @@
         emojiPanel.style.display = 'none';
       }
     });
-    populateEmojiPanel(); // Заповнюємо панель емодзі при завантаженні
-
-    // --- Редагування та Видалення Повідомлень ---
+    populateEmojiPanel(); 
 
     function deleteMessage(messageId) {
       if (confirm("Ви впевнені, що хочете видалити це повідомлення?")) {
@@ -640,7 +652,6 @@
     function startEditMessage(messageId, messageDiv, currentText) {
       if (!currentText) return; 
 
-      // Перевіряємо, чи вже не йде редагування цього повідомлення
       if (messageDiv.querySelector('.edit-message-input')) {
         return;
       }
@@ -650,10 +661,8 @@
         console.error("Не вдалося знайти .message-text-content для редагування в:", messageDiv);
         return;
       }
-      // Оновлюємо currentText, щоб він точно відповідав вмісту елемента, який редагуємо
       currentText = textContentElement.textContent;
 
-      // Ховаємо оригінальний текстовий елемент та кнопки дій
       textContentElement.style.display = 'none';
       const actionsDiv = messageDiv.querySelector('.message-actions');
       if (actionsDiv) {
@@ -662,7 +671,7 @@
       
       const input = document.createElement('textarea');
       input.classList.add('edit-message-input');
-      input.value = currentText; // Використовуємо текст без префіксу
+      input.value = currentText; 
       input.rows = Math.max(1, Math.min(5, (currentText.match(/\n/g) || []).length + 1)); 
       input.onkeydown = (e) => { 
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -683,16 +692,13 @@
           if (socket) {
             socket.emit('edit_message', { messageId, newText });
           }
-        } // Якщо текст не змінився, нічого не робимо, просто закриваємо редагування
-
-        // Прибираємо поле вводу та кнопки зберегти/скасувати
+        } 
         messageDiv.removeChild(saveButton);
         messageDiv.removeChild(cancelButton);
         messageDiv.removeChild(input);
 
-        // Показуємо оригінальний текстовий елемент (його вміст оновиться через 'message_edited' подію)
         textContentElement.style.display = '';
-        if (actionsDiv) actionsDiv.style.display = 'flex'; // Показуємо кнопки дій
+        if (actionsDiv) actionsDiv.style.display = 'flex'; 
       };
 
       const cancelButton = document.createElement('button');
@@ -707,35 +713,38 @@
         if (actionsDiv) actionsDiv.style.display = 'flex';
       };
 
-      // Вставляємо поле вводу та кнопки після елемента відправника (якщо він є) або на початок
       const senderElement = messageDiv.querySelector('.message-sender');
       (senderElement || messageDiv.firstChild).insertAdjacentElement('afterend', input);
-      input.insertAdjacentElement('afterend', saveButton); // Кнопки йдуть після поля вводу
+      input.insertAdjacentElement('afterend', saveButton); 
       saveButton.insertAdjacentElement('afterend', cancelButton);
       input.focus();
-      input.select(); // Виділяємо текст для зручності редагування
+      input.select(); 
     }
 
-    // --- Відповіді на повідомлення ---
-    const replyPreviewDiv = document.getElementById('replyPreview');
-    const replyPreviewUser = document.getElementById('replyPreviewUser');
-    const replyPreviewText = document.getElementById('replyPreviewText');
-    const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+    // replyPreviewUser, replyPreviewText, replyPreviewDiv, cancelReplyBtn вже оголошені глобально
+    // msgInput також оголошено глобально
 
     function startReply(messageId, user, text) {
       currentReplyInfo = {
         messageId: messageId,
         user: user,
-        // Обрізаємо текст для попереднього перегляду, якщо він задовгий
         text: text.length > 50 ? text.substring(0, 47) + "..." : text
       };
 
       replyPreviewUser.textContent = user;
+      // Спочатку видаляємо будь-які попередні класи кольорів
+      replyPreviewUser.classList.remove('reply-user-baby-color', 'reply-user-cloud-color');
+
+      // Застосовуємо новий клас кольору залежно від користувача
+      if (user === "Baby 😎") {
+        replyPreviewUser.classList.add('reply-user-baby-color');
+      } else if (user === "Pink Cloud ☁️") {
+        replyPreviewUser.classList.add('reply-user-cloud-color');
+      }
       replyPreviewText.textContent = currentReplyInfo.text;
       replyPreviewDiv.style.display = 'flex';
       
-      const msgInput = document.getElementById('msgInput');
-      msgInput.focus(); // Фокус на полі вводу
+      msgInput.focus(); 
     }
 
     function cancelReply() {
