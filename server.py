@@ -151,6 +151,17 @@ def handle_request_global_theme_change(data):
         print(f"Global theme changed to: {current_global_theme} by {users.get(request.sid, 'Unknown')}")
         emit('theme_changed_globally', {'theme': current_global_theme}, broadcast=True)
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    user_sid = request.sid
+    if user_sid in users:
+        nickname = users.pop(user_sid)
+        print(f"User {nickname} (SID: {user_sid}) disconnected.")
+        # Оновлюємо список онлайн користувачів для всіх інших
+        emit("users_online", list(users.values()), broadcast=True)
+    else:
+        print(f"User with SID: {user_sid} disconnected before registration or was already removed.")
+
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
 # але логіка в 'connect' та 'register' має покривати більшість випадків.
