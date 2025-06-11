@@ -6,6 +6,7 @@ import threading
 import time # Потрібен для відстеження часу
 from functools import wraps # Для створення декораторів
 import os # Для доступу до змінних середовища
+from werkzeug.middleware.proxy_fix import ProxyFix # Додаємо імпорт ProxyFix
 
 
 app = Flask(__name__)
@@ -17,6 +18,10 @@ cors_allowed_origins="*",
 max_http_buffer_size=10 * 1024 * 1024, # Збільшуємо до 10MB
 ping_timeout=60,    # Час очікування відповіді pong (в секундах)
 ping_interval=25)   # Інтервал надсилання ping (в секундах)
+
+# Застосовуємо ProxyFix, щоб правильно визначати IP клієнта за проксі (наприклад, на Render)
+# x_for=1 означає, що ми довіряємо одному проксі-серверу попереду.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 # --- Адміністративний пароль ---
 # Краще встановити через змінну середовища ADMIN_PASSWORD
@@ -32,8 +37,10 @@ current_global_theme = 'default' # Зберігаємо поточну глоб�
 @socketio.on('connect')
 def handle_connect():
     # При підключенні нового клієнта, надсилаємо йому поточний стан музики
-    print(f"Client connected from IP: {request.remote_addr}, SID: {request.sid}")
     global current_global_track, current_global_theme
+    user_agent_string = request.headers.get('User-Agent', 'N/A')
+    accept_language = request.headers.get('Accept-Language', 'N/A')
+    print(f"Client connected from IP: {request.remote_addr}, SID: {request.sid}, User-Agent: {user_agent_string}, Lang: {accept_language}")
     if current_global_track:
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
     else:
@@ -46,8 +53,10 @@ def handle_connect():
 @socketio.on('register')
 def handle_register(nickname):
     global current_global_track, current_global_theme # Доступ до глобальних змінних
-    users[request.sid] = {'nickname': nickname, 'ip': request.remote_addr}
-    print(f"User {nickname} (SID: {request.sid}, IP: {request.remote_addr}) registered.")
+    user_agent_string = request.headers.get('User-Agent', 'N/A')
+    accept_language = request.headers.get('Accept-Language', 'N/A')
+    users[request.sid] = {'nickname': nickname, 'ip': request.remote_addr, 'user_agent': user_agent_string, 'language': accept_language}
+    print(f"User {nickname} (SID: {request.sid}, IP: {request.remote_addr}, User-Agent: {user_agent_string}, Lang: {accept_language}) registered.")
     emit("users_online", [data['nickname'] for data in users.values()], broadcast=True)
     # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
     # (це для надійності, хоча emit в 'connect' має спрацювати)
@@ -164,9 +173,11 @@ def handle_request_global_theme_change(data):
     if new_theme in ['default', 'black-metal']: # Валідація
         user_data = users.get(request.sid)
         user_nickname = user_data['nickname'] if user_data else "Unknown"
-        user_ip = user_data['ip'] if user_data else request.remote_addr # IP з реєстрації або поточний
+        user_ip = user_data.get('ip', request.remote_addr) if user_data else request.remote_addr
+        user_agent = user_data.get('user_agent', request.headers.get('User-Agent', 'N/A')) if user_data else request.headers.get('User-Agent', 'N/A') # TODO: Refactor this logic
+        user_lang = user_data.get('language', request.headers.get('Accept-Language', 'N/A')) if user_data else request.headers.get('Accept-Language', 'N/A')
         current_global_theme = new_theme
-        print(f"Global theme changed to: {current_global_theme} by {user_nickname} (IP: {user_ip}, SID: {request.sid})")
+        print(f"Global theme changed to: {current_global_theme} by {user_nickname} (IP: {user_ip}, SID: {request.sid}, User-Agent: {user_agent}, Lang: {user_lang})")
         emit('theme_changed_globally', {'theme': current_global_theme}, broadcast=True)
 
 @socketio.on('disconnect')
@@ -176,11 +187,15 @@ def handle_disconnect():
         user_data = users.pop(user_sid)
         nickname = user_data['nickname']
         ip_address = user_data['ip']
-        print(f"User {nickname} (SID: {user_sid}, IP: {ip_address}) disconnected.")
+        user_agent = user_data.get('user_agent', 'N/A') # Отримуємо user_agent, якщо він був збережений
+        language = user_data.get('language', 'N/A')
+        print(f"User {nickname} (SID: {user_sid}, IP: {ip_address}, User-Agent: {user_agent}, Lang: {language}) disconnected.")
         # Оновлюємо список онлайн користувачів для всіх інших
         emit("users_online", [data['nickname'] for data in users.values()], broadcast=True)
     else:
-        print(f"User with SID: {user_sid} (IP: {request.remote_addr}) disconnected before registration or was already removed.")
+        user_agent_string = request.headers.get('User-Agent', 'N/A') # Намагаємося отримати User-Agent, якщо можливо
+        accept_language = request.headers.get('Accept-Language', 'N/A')
+        print(f"User with SID: {user_sid} (IP: {request.remote_addr}, User-Agent: {user_agent_string}, Lang: {accept_language}) disconnected before registration or was already removed.")
 
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
@@ -223,7 +238,9 @@ def show_online_users():
         online_users_details.append({
             'sid': sid,
             'nickname': data['nickname'],
-            'ip': data.get('ip', 'N/A') # .get('ip') для безпеки, якщо раптом IP не записався
+            'ip': data.get('ip', 'N/A'),
+            'user_agent': data.get('user_agent', 'N/A'),
+            'language': data.get('language', 'N/A') # Додаємо мову
         })
     return {"online_users_details": online_users_details, "count": len(users)}
 
