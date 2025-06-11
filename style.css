@@ -1273,16 +1273,16 @@ body.black-metal-theme {
 }
 
 .black-metal-theme .message-baby {
-  background-color: #380000 !important; /* Темно-червоний, !important для перекриття */
-  color: #ff9a9a;
-  border-right: 3px solid #700000 !important; /* Ще темніший червоний справа, !important */
+  background-color: #101030 !important; /* Темно-синій/фіолетовий (був у Cloud) */
+  color: #babaff; /* (був у Cloud) */
+  border-right: 3px solid #000045 !important; /* Ще темніший синій/фіолетовий справа (був у Cloud, але сторона відповідає Baby) */
   border-top-right-radius: 0; /* "Хвостик" справа зверху */
 }
 
 .black-metal-theme .message-cloud {
-  background-color: #101030 !important; /* Темно-синій/фіолетовий, !important */
-  color: #babaff;
-  border-left: 3px solid #000045 !important; /* Ще темніший синій/фіолетовий зліва, !important */
+  background-color: #380000 !important; /* Темно-червоний (був у Baby) */
+  color: #ff9a9a; /* (був у Baby) */
+  border-left: 3px solid #700000 !important; /* Ще темніший червоний зліва (був у Baby, але сторона відповідає Cloud) */
   border-top-left-radius: 0; /* "Хвостик" зліва зверху */
 }
  
@@ -1292,20 +1292,20 @@ body.black-metal-theme {
 }
 
 .black-metal-theme .message-baby .message-sender {
-  color: #ff7777; /* Яскравіший червоний для Baby */
+  color: #9999ff; /* Яскравіший синій для Baby (був у Cloud) */
 }
 
 .black-metal-theme .message-cloud .message-sender {
-  color: #9999ff; /* Яскравіший синій для Cloud */
+  color: #ff7777; /* Яскравіший червоний для Cloud (був у Baby) */
 }
 
 .black-metal-theme .reply-quote-user-baby-color,
 .black-metal-theme .reply-user-baby-color {
-    color: #ff7777 !important;
+    color: #9999ff !important; /* Синій для цитат/відповідей Baby */
 }
 .black-metal-theme .reply-quote-user-cloud-color,
 .black-metal-theme .reply-user-cloud-color {
-    color: #9999ff !important;
+    color: #ff7777 !important; /* Червоний для цитат/відповідей Cloud */
 }
 
 .black-metal-theme .message-reply-quote {
