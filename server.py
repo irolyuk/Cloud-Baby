@@ -35,6 +35,15 @@ if not ADMIN_PASSWORD:
     print("!!! Будь ласка, встановіть ADMIN_PASSWORD у налаштуваннях вашого середовища. !!!")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
+# --- Пароль для входу в чат (клієнтська сторона) ---
+CHAT_ENTRY_PASSWORD = os.environ.get('CHAT_ENTRY_PASSWORD')
+if not CHAT_ENTRY_PASSWORD:
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("!!! УВАГА: Змінна середовища CHAT_ENTRY_PASSWORD не встановлена!            !!!")
+    print("!!! Вхід у чат через пароль на клієнті може не працювати належним чином.   !!!")
+    print("!!! Будь ласка, встановіть CHAT_ENTRY_PASSWORD.                             !!!")
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
 current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
@@ -250,6 +259,11 @@ def show_online_users():
             'language': data.get('language', 'N/A') # Додаємо мову
         })
     return {"online_users_details": online_users_details, "count": len(users)}
+
+@app.route('/api/chat-config')
+def chat_config():
+    # Повертаємо конфігурацію, включаючи пароль для входу, якщо він встановлений
+    return {"entryPassword": CHAT_ENTRY_PASSWORD if CHAT_ENTRY_PASSWORD else ""}
 
 
 if __name__ == '__main__':

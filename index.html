@@ -202,16 +202,34 @@
      "Pink Cloud ☁️": "message-cloud"
     };
 
-    function checkPassword() {
-      const passwordValue = passwordInput.value; // Використовуємо глобальну змінну
-      if (passwordValue === "26060512") {
-        nicknameSelection.style.display = "block"; // Використовуємо глобальну змінну
-        passwordInput.style.display = "none"; 
-        loginButton.style.display = "none";   // Використовуємо глобальну змінну
-        loginError.textContent = ""; // Використовуємо глобальну змінну
-      } else {
-        loginError.textContent = "Неправильний пароль."; // Використовуємо глобальну змінну
+    async function checkPassword() {
+      const enteredPassword = passwordInput.value;
+      loginButton.disabled = true; // Блокуємо кнопку на час перевірки
+      loginError.textContent = "Перевірка...";
+
+      try {
+        const response = await fetch('/api/chat-config'); // Запит до нового ендпоінту
+        if (!response.ok) {
+          throw new Error(`Помилка сервера: ${response.status}`);
+        }
+        const config = await response.json();
+        const correctPassword = config.entryPassword;
+
+        if (correctPassword && enteredPassword === correctPassword) {
+          nicknameSelection.style.display = "block";
+          passwordInput.style.display = "none";
+          loginButton.style.display = "none";
+          loginError.textContent = "";
+        } else if (!correctPassword) { // Якщо сервер не надав пароль (не налаштовано)
+          loginError.textContent = "Вхід тимчасово недоступний. Спробуйте пізніше.";
+        } else {
+          loginError.textContent = "Неправильний пароль.";
+        }
+      } catch (error) {
+        console.error("Помилка отримання конфігурації чату:", error);
+        loginError.textContent = "Помилка з'єднання. Спробуйте пізніше.";
       }
+      loginButton.disabled = false; // Розблоковуємо кнопку
     }
 
     function chooseNickname(nick) {
