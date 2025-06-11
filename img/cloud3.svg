@@ -1,0 +1,12 @@
+<svg viewBox="0 0 140 70" xmlns="http://www.w3.org/2000/svg" fill="#FFE4E1"> <!-- MistyRose, як фон кнопок -->
+  <style>
+    .cloud-main {
+      filter: drop-shadow(1px 2px 1px rgba(100,100,100,0.12)); /* Легша, сірувата тінь */
+    }
+  </style>
+  <g class="cloud-main">
+    <ellipse cx="40" cy="40" rx="35" ry="20"/>
+    <ellipse cx="75" cy="35" rx="45" ry="25"/>
+    <ellipse cx="100" cy="42" rx="30" ry="18"/>
+  </g>
+</svg>

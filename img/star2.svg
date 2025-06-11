@@ -1,0 +1,13 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="starGlow2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <polygon points="50,0 60,40 100,50 60,60 50,100 40,60 0,50 40,40" fill="yellow" filter="url(#starGlow2)"/>
+  <polygon points="50,0 60,40 100,50 60,60 50,100 40,60 0,50 40,40" fill="rgba(255,255,200,0.8)" style="transform: scale(0.85); transform-origin: center;"/>
+</svg>

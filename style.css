@@ -1473,28 +1473,116 @@ body.black-metal-theme {
   scrollbar-color: #444 #1a1a1a;
 }
 
-/* Spider Animation Styles */
-@keyframes spiderRunAcrossChat {
+/* Ghost Animation Styles */
+@keyframes ghostFloatAcrossChat {
   0% {
-    left: -55px; /* Починаємо за лівим краєм контейнера чату */
+    left: -55px; /* Починаємо за лівим краєм */
     opacity: 0;
+    transform: translateY(0px);
   }
-  5% { /* Швидко з'являється */
-    left: -25px; /* Трохи просунувся */
-    opacity: 1;
+  10% { /* Плавно з'являється і починає рухатись */
+    opacity: 0.7; /* Привиди часто трохи прозорі */
+    transform: translateY(-8px); /* Невеликий рух вгору */
   }
-  95% { /* Рухається, залишаючись видимим */
-    left: calc(100% - 25px); /* Майже досяг правого краю */
-    opacity: 1;
+  25% {
+    transform: translateY(8px); /* Невеликий рух вниз */
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  55% {
+    transform: translateY(8px);
+  }
+  70% {
+    transform: translateY(-8px);
+  }
+  85% {
+    transform: translateY(8px);
+  }
+  90% { /* Починає зникати */
+    opacity: 0.7;
+    transform: translateY(0px); /* Повертається до центральної лінії перед зникненням */
   }
   100% {
-    left: calc(100% + 55px); /* Повністю за правим краєм контейнера чату */
+    left: calc(100% + 55px); /* Повністю за правим краєм */
     opacity: 0; /* Зникає */
+    transform: translateY(0px);
   }
 }
 
-/* Клас для запуску анімації павука, активний тільки в темній темі */
-body.black-metal-theme .spider-animate-run {
+/* Клас для запуску анімації привида, активний тільки в темній темі */
+body.black-metal-theme .ghost-animate-run {
   display: block !important; /* Робимо видимим, !important для перекриття inline style="display: none;" */
-  animation: spiderRunAcrossChat 4s linear 1 forwards; /* 4 секунди, 1 раз, залишається в кінцевому стані анімації */
+  animation: ghostFloatAcrossChat 6s ease-in-out 1 forwards; /* 6 секунд, плавний рух, 1 раз, залишається в кінцевому стані */
+  /* Зображення привида вже має колір currentColor, тому він буде братися з батьківського елемента
+     або з CSS змінної, якщо вона визначена для кольору тексту в темній темі.
+     Якщо #ghostContainer має свій колір, то SVG його успадкує.
+     В index.html для #ghostContainer не задано колір, тому він буде брати колір тексту body.black-metal-theme, тобто #c0c0c0 */
+}
+
+/* Додаємо ефект світіння для самого зображення привида в темній темі */
+body.black-metal-theme .ghost-animate-run img {
+  filter: drop-shadow(0 0 8px rgba(120, 220, 255, 0.75)) /* Яскравіше блакитне світіння */
+          drop-shadow(0 0 15px rgba(150, 230, 255, 0.6)); /* Більш розмите світло-блакитне світіння */
+  /* Можете поекспериментувати з кольорами та розмірами тіні для бажаного ефекту */
+}
+
+/* Cloud Animation Styles (for light theme) */
+@keyframes cloudFloatAcrossChat {
+  0% {
+    /* left: -70px; встановлюється JavaScript */
+    opacity: 0;
+    transform: translateY(0px);
+  }
+  10% {
+    opacity: 0.9; /* Хмаринки досить щільні */
+    transform: translateY(-5px); /* Невеликий рух вгору */
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(5px); /* Рух вниз */
+  }
+  90% {
+    opacity: 0.9;
+    transform: translateY(-2px); /* Трохи вгору */
+  }
+  100% {
+    left: calc(100% + 10px); /* Кінцева позиція: лівий край хмаринки на 10px за правим краєм контейнера чату */
+    opacity: 0;
+    transform: translateY(0px);
+  }
+}
+
+/* Клас для запуску анімації хмаринки, активний тільки в світлій темі (не .black-metal-theme) */
+body:not(.black-metal-theme) .cloud-animate-run {
+  display: block !important;
+  animation: cloudFloatAcrossChat 8s linear 1 forwards; /* 8 секунд, повільніше за привида */
+  /* Тінь вже задана в SVG через фільтр, тут додатково не потрібна,
+     або можна додати filter: drop-shadow(...) якщо потрібно інше світіння/тінь */
+}
+
+/* Star Animation Styles (for light theme) */
+@keyframes starFallAnimation {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3) rotate(0deg); /* Починаємо меншою і без обертання шляху */
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--star-fall-translateX) * 0.2), calc(var(--star-fall-translateY) * 0.2)) scale(1) rotate(72deg); /* Починає падати і трохи обертатися */
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--star-fall-translateX), var(--star-fall-translateY)) scale(0.3) rotate(360deg); /* Зменшується, зникає і завершує обертання */
+  }
+}
+
+/* Клас для запуску анімації зірки, активний тільки в світлій темі */
+body:not(.black-metal-theme) .star-animate-fall {
+  display: block !important;
+  animation-name: starFallAnimation;
+  animation-duration: var(--star-fall-duration, 4s); /* Використовуємо змінну з JS, або 4с за замовчуванням */
+  animation-timing-function: ease-in; /* Починається повільно, потім прискорюється */
+  animation-fill-mode: forwards; /* Залишається в кінцевому стані (прозорою і за межами) */
+  /* Зображення зірки має власний filter:glow з SVG */
 }

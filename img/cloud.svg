@@ -1,0 +1,13 @@
+<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" fill="#FFC0CB"> <!-- Рожевий колір (Pink) -->
+  <style>
+    .cloud-main {
+      filter: drop-shadow(2px 3px 2px rgba(139,0,139,0.15)); /* Тінь темно-пурпурового кольору з невеликою прозорістю */
+    }
+  </style>
+  <g class="cloud-main">
+    <circle cx="30" cy="45" r="25"/>
+    <circle cx="55" cy="35" r="30"/>
+    <circle cx="85" cy="40" r="28"/>
+    <rect x="25" y="40" width="65" height="30" rx="15" ry="15"/>
+  </g>
+</svg>
