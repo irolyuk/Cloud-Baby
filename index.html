@@ -528,10 +528,10 @@
       const actionsDiv = document.createElement("div");
       actionsDiv.classList.add("message-actions");
 
-      if (data.user === "Baby 😎") { 
-        actionsDiv.classList.add("actions-left");
-      } else if (data.user === "Pink Cloud ☁️") { 
+      if (data.user === "Baby 😎") { // Baby тепер зліва, кнопки дій справа від повідомлення
         actionsDiv.classList.add("actions-right");
+      } else if (data.user === "Pink Cloud ☁️") { // Cloud тепер справа, кнопки дій зліва від повідомлення
+        actionsDiv.classList.add("actions-left");
       }
 
       const replyButton = document.createElement("button");
@@ -1017,19 +1017,23 @@
       const containerRect = chatContainerElement.getBoundingClientRect();
       const ghostHeight = 50; // Приблизна висота привида
 
-      // Випадкова вертикальна позиція
+      // Випадкова вертикальна позиція та початкове горизонтальне положення
       const randomTop = Math.random() * (containerRect.height - ghostHeight);
       ghostContainer.style.top = `${randomTop}px`;
+      ghostContainer.style.left = '-55px'; // Базова початкова позиція для анімації зліва
+      ghostContainer.style.right = 'auto'; // Переконуємося, що right не заважає
 
-      // Випадково відзеркалюємо привида
+      // Випадково обираємо напрямок руху та віддзеркалюємо привида
       if (Math.random() < 0.5) {
-        ghostImage.style.transform = 'scaleX(-1)'; // Відзеркалений
+        // Рух зліва направо (стандартний)
+        ghostImage.style.transform = 'scaleX(1)'; // Нормальний вигляд
+        ghostContainer.style.animationDirection = 'normal';
       } else {
-        ghostImage.style.transform = 'scaleX(1)'; // Нормальний
+        // Рух справа наліво
+        ghostImage.style.transform = 'scaleX(-1)'; // Віддзеркалюємо, щоб "дивився" вліво
+        ghostContainer.style.animationDirection = 'reverse'; // Анімація у зворотному напрямку
       }
       
-      // Анімація завжди зліва направо (або як налаштовано в CSS)
-      ghostContainer.style.left = '-55px'; // Початкова позиція для анімації
       ghostContainer.style.display = 'block';
       ghostContainer.classList.add('ghost-animate-run'); // Змінено клас
 
@@ -1039,6 +1043,9 @@
     function handleGhostAnimationEnd() { // Змінено назву функції
       ghostContainer.style.display = 'none';
       ghostContainer.classList.remove('ghost-animate-run'); // Змінено клас
+      // Скидаємо напрямок анімації та трансформацію для наступного запуску
+      ghostContainer.style.animationDirection = 'normal';
+      ghostImage.style.transform = 'scaleX(1)';
     }
 
     // Cloud Animation Logic

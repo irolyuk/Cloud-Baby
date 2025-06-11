@@ -39,13 +39,13 @@ h1 {
   background-color: #b5c8fd !important; /* світло-рожевий, додамо !important для перекриття */
   color: #031e58; /* cиній */
   font-weight: bold;
-  align-self: flex-end; /* Baby повідомлення справа */
-  border-top-left-radius: 0;
+  align-self: flex-start; /* Baby повідомлення зліва */
+  border-top-right-radius: 0; /* "Хвостик" справа зверху */
 }
 .message-cloud {
   background-color: rgb(248, 228, 241) !important; /* блакитний, додамо !important для перекриття */
-  align-self: flex-start; /* Cloud повідомлення зліва */
-  border-top-right-radius: 0;
+  align-self: flex-end; /* Cloud повідомлення справа */
+  border-top-left-radius: 0; /* "Хвостик" зліва зверху */
   color: #ff75a3; 
   font-weight: bold;
 }
@@ -1275,15 +1275,15 @@ body.black-metal-theme {
 .black-metal-theme .message-baby {
   background-color: #380000 !important; /* Темно-червоний, !important для перекриття */
   color: #ff9a9a;
-  border-left: 3px solid #700000 !important; /* Ще темніший червоний, !important */
-  border-top-left-radius: 0; /* Зберігаємо форму */
+  border-right: 3px solid #700000 !important; /* Ще темніший червоний справа, !important */
+  border-top-right-radius: 0; /* "Хвостик" справа зверху */
 }
 
 .black-metal-theme .message-cloud {
   background-color: #101030 !important; /* Темно-синій/фіолетовий, !important */
   color: #babaff;
-  border-right: 3px solid #000045 !important; /* Ще темніший синій/фіолетовий, !important */
-  border-top-right-radius: 0; /* Зберігаємо форму */
+  border-left: 3px solid #000045 !important; /* Ще темніший синій/фіолетовий зліва, !important */
+  border-top-left-radius: 0; /* "Хвостик" зліва зверху */
 }
  
 .black-metal-theme .message-sender {
