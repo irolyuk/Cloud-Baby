@@ -169,9 +169,16 @@ def handle_disconnect():
 # def handle_get_current_music_state():
 #     # ... логіка надсилання поточного стану, схожа на ту, що в 'connect' ...
 
+
 @app.route('/')
 def index():
     return "WebSocket сервер працює!"
+
+@app.route('/admin/online_users')
+def show_online_users():
+    # Переконуємося, що ми працюємо в контексті Flask-запиту,
+    # але users - це глобальна змінна, тому доступна.
+    return {"online_users": list(users.values()), "count": len(users)}
 
 if __name__ == '__main__':
     import os
