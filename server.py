@@ -26,7 +26,14 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 # --- Адміністративний пароль ---
 # Краще встановити через змінну середовища ADMIN_PASSWORD
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin') # Можна також задати ім'я користувача
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '26060512') # ЗАМІНІТЬ ЦЕ НАДІЙНИМ ПАРОЛЕМ!
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+
+if not ADMIN_PASSWORD:
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("!!! УВАГА: Змінна середовища ADMIN_PASSWORD не встановлена!                 !!!")
+    print("!!! Доступ до адмін-панелі (/admin/online_users) буде неможливим.         !!!")
+    print("!!! Будь ласка, встановіть ADMIN_PASSWORD у налаштуваннях вашого середовища. !!!")
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
