@@ -534,6 +534,7 @@ h1 {
 
 /* Стилі для екрану входу */
 .login-screen {
+  position: relative; /* Для позиціонування кнопки перемикання теми */
   background-color: white;
   border: 2px solid #ffb6c1; /* Рожева рамка, як у чата */
   border-radius: 20px;       /* Закруглені кути */
@@ -1112,6 +1113,43 @@ h1 {
   transform: scale(1.1);
 }
 
+/* Кнопка перемикання теми на екрані входу */
+#loginThemeToggleBtn {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  background-color: #fde4f0;
+  border: 1px solid #ffc0cb;
+  color: #d63384;
+  border-radius: 50%;
+  width: 36px; /* Можна зробити трохи меншою, ніж у чаті */
+  height: 36px;
+  font-size: 1.3rem; /* Відповідно менший розмір іконки */
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 0;
+  line-height: 1;
+}
+
+#loginThemeToggleBtn:hover {
+  background-color: #ffc0cb;
+  transform: scale(1.1);
+}
+
+.black-metal-theme #loginThemeToggleBtn {
+  background-color: #1a1a1a; /* Такий же, як інші кнопки в темній темі */
+  color: #b8860b; /* DarkGoldenrod */
+  border: 1px solid #333; /* Рамка, як у інших кнопок */
+}
+.black-metal-theme #loginThemeToggleBtn:hover {
+  background-color: #333; /* Стандартний hover для кнопок темної теми */
+  color: #fff;
+  border-color: #666;
+}
 
 
 /* Black Metal Theme Styles */
@@ -1433,4 +1471,30 @@ body.black-metal-theme {
 .black-metal-theme {
   scrollbar-width: thin;
   scrollbar-color: #444 #1a1a1a;
+}
+
+/* Spider Animation Styles */
+@keyframes spiderRunAcrossChat {
+  0% {
+    left: -55px; /* Починаємо за лівим краєм контейнера чату */
+    opacity: 0;
+  }
+  5% { /* Швидко з'являється */
+    left: -25px; /* Трохи просунувся */
+    opacity: 1;
+  }
+  95% { /* Рухається, залишаючись видимим */
+    left: calc(100% - 25px); /* Майже досяг правого краю */
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% + 55px); /* Повністю за правим краєм контейнера чату */
+    opacity: 0; /* Зникає */
+  }
+}
+
+/* Клас для запуску анімації павука, активний тільки в темній темі */
+body.black-metal-theme .spider-animate-run {
+  display: block !important; /* Робимо видимим, !important для перекриття inline style="display: none;" */
+  animation: spiderRunAcrossChat 4s linear 1 forwards; /* 4 секунди, 1 раз, залишається в кінцевому стані анімації */
 }

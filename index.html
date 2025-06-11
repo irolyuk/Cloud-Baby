@@ -13,7 +13,8 @@
 
   <!-- Екран входу -->
   <div class="login-screen" id="loginScreen">
-    <h2>Вхід у парадайз</h2>
+    <button id="loginThemeToggleBtn" title="Переключити на темну тему">😎</button>
+    <h2 id="loginTitleElement">Вхід у парадайз</h2>
     <input type="password" id="passwordInput" placeholder="Введіть пароль" />
     <div id="nicknameSelection" style="display: none;">
       <p>Вибери свій нікнейм манюня моя:</p>
@@ -26,16 +27,19 @@
 
   <!-- Чат -->
   <div class="chat-container" id="chatContainer" style="display: none;">
-    <h1>🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
+    <h1 id="chatTitle">🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
     <button id="themeToggleBtn" title="Змінити тему">🤘</button>
     <button id="openGalleryBtn" class="gallery-toggle-btn">🖼️</button>
+    <!-- Переміщено spiderContainer сюди -->
+    <div id="spiderContainer" style="display: none; position: absolute; z-index: 999; pointer-events: none; color: #c0c0c0;">
+      <img id="spiderImage" src="img/spider.svg" alt="spider" style="width: 50px; height: auto; display: block;">
+    </div>
     <div id="chat" class="chat-box"></div>
     <!-- Новий контейнер для індикатора набору тексту всередині чату -->
     <div id="chatTypingIndicator" class="typing-message-in-chat" style="visibility: hidden;"></div>
     <div class="media-controls-area">
       <!-- Припускаємо, що тут можуть бути кнопки для вибору музики, якщо вони є -->
       <div class="items">
-        <!-- Приклад кнопки музики, додайте свої, якщо потрібно -->
         <!-- <button class="item-btn" onclick="playMusic('audio/your-song.mp3', this)">🎵 Назва Пісні</button> -->
         <button class="item-btn" data-audiosrc="audio/Autumn-love.m4a" onclick="playMusic('audio/Autumn-love.m4a', this)">🍂Любов як осінь🍂</button>
         <button class="item-btn" data-audiosrc="audio/Bounty.mp3" onclick="playMusic('audio/Bounty.mp3', this)">💖Bounty💖</button>
@@ -114,6 +118,7 @@
     let currentReplyInfo = null; // Для зберігання інформації про повідомлення, на яке відповідаємо
     let currentGlobalAudioSrc = null; // Зберігає src поточної глобальної пісні
     let messageIdToDeleteGlobally = null; // Для збереження ID повідомлення, яке підтверджується на видалення
+    let spiderIntervalId = null; // Оголошуємо тут, щоб уникнути ReferenceError
 
     // DOM Element References - Initialized once the script loads
     // Login Screen
@@ -121,9 +126,12 @@
     const passwordInput = document.getElementById('passwordInput');
     const nicknameSelection = document.getElementById('nicknameSelection');
     const loginButton = document.getElementById('loginButton'); 
+    const loginThemeToggleBtn = document.getElementById('loginThemeToggleBtn'); // Кнопка теми на екрані входу
+    const loginTitleElement = document.getElementById('loginTitleElement'); // Додаємо посилання на заголовок входу
     const loginError = document.getElementById('loginError');
     const chatContainer = document.getElementById('chatContainer');
 
+    const chatTitle = document.getElementById('chatTitle'); // Додаємо посилання на заголовок
     // Chat Area
     const chat = document.getElementById('chat');
     const chatTypingIndicator = document.getElementById('chatTypingIndicator');
@@ -160,6 +168,8 @@
     // Custom Confirm Modal Elements
     const customConfirmModal = document.getElementById('customConfirmModal');
     const customConfirmModalText = document.getElementById('customConfirmModalText');
+    const spiderContainer = document.getElementById('spiderContainer');
+    const spiderImage = document.getElementById('spiderImage');
     const customConfirmOkBtn = document.getElementById('customConfirmOkBtn');
     const customConfirmCancelBtn = document.getElementById('customConfirmCancelBtn');
     const customConfirmModalCloseBtn = document.getElementById('customConfirmModalCloseBtn');
@@ -227,9 +237,19 @@
           if (isBlackMetal) {
             themeToggleBtn.textContent = '☁️';
             themeToggleBtn.title = "Переключити на світлу тему";
+            loginThemeToggleBtn.textContent = '☁️';
+            loginThemeToggleBtn.title = "Переключити на світлу тему";
+            chatTitle.textContent = '💀 🖤 Rakhiv Dark Forest 🖤 💀';
+            loginTitleElement.textContent = 'Вхід у темний ліс';
+            startSpiderInterval();
           } else {
             themeToggleBtn.textContent = '😎';
             themeToggleBtn.title = "Переключити на темну тему";
+            loginThemeToggleBtn.textContent = '😎';
+            loginThemeToggleBtn.title = "Переключити на темну тему";
+            chatTitle.textContent = '🌸 💗 Rakhiv Paradise 💗 🌸';
+            loginTitleElement.textContent = 'Вхід у парадайз';
+            stopSpiderInterval();
           }
           console.log(`Тема синхронізована з сервером: ${newTheme}`);
         }
@@ -892,9 +912,19 @@
       if (willBeBlackMetal) {
         themeToggleBtn.textContent = '☁️'; // Узгоджуємо з loadTheme
         themeToggleBtn.title = "Переключити на світлу тему";
+        loginThemeToggleBtn.textContent = '☁️';
+        loginThemeToggleBtn.title = "Переключити на світлу тему";
+        chatTitle.textContent = '💀 🖤 Rakhiv Dark Forest 🖤 💀';
+        loginTitleElement.textContent = 'Вхід у темний ліс';
+        startSpiderInterval(); // Start spider interval for dark theme
       } else {
         themeToggleBtn.textContent = '😎'; // Узгоджуємо з loadTheme
         themeToggleBtn.title = "Переключити на темну тему";
+        loginThemeToggleBtn.textContent = '😎';
+        loginThemeToggleBtn.title = "Переключити на темну тему";
+        chatTitle.textContent = '🌸 💗 Rakhiv Paradise 💗 🌸';
+        loginTitleElement.textContent = 'Вхід у парадайз';
+        stopSpiderInterval(); // Stop spider interval for light theme
       }
 
       // Надсилаємо запит на зміну теми на сервер
@@ -909,13 +939,82 @@
         document.body.classList.add('black-metal-theme');
         themeToggleBtn.textContent = '☁️';
         themeToggleBtn.title = "Переключити на світлу тему";
+        loginThemeToggleBtn.textContent = '☁️';
+        loginThemeToggleBtn.title = "Переключити на світлу тему";
+        chatTitle.textContent = '💀 🖤 Rakhiv Dark Forest 🖤 💀';
+        loginTitleElement.textContent = 'Вхід у темний ліс';
+        startSpiderInterval();
       } else {
         themeToggleBtn.textContent = '😎';
         themeToggleBtn.title = "Переключити на темну тему";
+        loginThemeToggleBtn.textContent = '😎';
+        loginThemeToggleBtn.title = "Переключити на темну тему";
+        chatTitle.textContent = '🌸 💗 Rakhiv Paradise 💗 🌸';
+        loginTitleElement.textContent = 'Вхід у парадайз';
+        stopSpiderInterval(); // Ensure it's stopped if default is light
       }
     }
     themeToggleBtn.addEventListener('click', toggleTheme);
+    loginThemeToggleBtn.addEventListener('click', toggleTheme); // Додаємо обробник для нової кнопки
     loadTheme(); // Load theme preference on page load
+
+    // Spider Animation Logic
+    // spiderIntervalId було переміщено на початок скрипта
+
+    function startSpiderInterval() {
+      if (spiderIntervalId) clearInterval(spiderIntervalId); 
+
+      spiderIntervalId = setInterval(() => {
+        if (document.body.classList.contains('black-metal-theme') && 
+            !spiderContainer.classList.contains('spider-animate-run') &&
+            chatContainer.style.display !== 'none') {
+          if (Math.random() < 0.25) { // 25% шанс кожні 7 секунд
+            runSpiderAnimation();
+          }
+        }
+      }, 7000); 
+    }
+
+    function stopSpiderInterval() {
+      if (spiderIntervalId) {
+        clearInterval(spiderIntervalId);
+        spiderIntervalId = null;
+      }
+      spiderContainer.style.display = 'none';
+      spiderContainer.classList.remove('spider-animate-run');
+      spiderContainer.removeEventListener('animationend', handleSpiderAnimationEnd);
+    }
+
+    function runSpiderAnimation() {
+      const chatContainerElement = document.getElementById('chatContainer');
+      if (!chatContainerElement || chatContainerElement.style.display === 'none') return;
+
+      const containerRect = chatContainerElement.getBoundingClientRect();
+      const spiderHeight = 50; // Приблизна висота павука
+
+      // Випадкова вертикальна позиція
+      const randomTop = Math.random() * (containerRect.height - spiderHeight);
+      spiderContainer.style.top = `${randomTop}px`;
+
+      // Випадково відзеркалюємо павука
+      if (Math.random() < 0.5) {
+        spiderImage.style.transform = 'scaleX(-1)'; // Відзеркалений
+      } else {
+        spiderImage.style.transform = 'scaleX(1)'; // Нормальний
+      }
+      
+      // Анімація завжди зліва направо, CSS це обробляє
+      spiderContainer.style.left = '-55px'; // Початкова позиція для анімації
+      spiderContainer.style.display = 'block';
+      spiderContainer.classList.add('spider-animate-run');
+
+      spiderContainer.addEventListener('animationend', handleSpiderAnimationEnd, { once: true });
+    }
+
+    function handleSpiderAnimationEnd() {
+      spiderContainer.style.display = 'none';
+      spiderContainer.classList.remove('spider-animate-run');
+    }
   </script>
 </body>
 </html>
