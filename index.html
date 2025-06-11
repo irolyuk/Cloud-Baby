@@ -2,7 +2,9 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Uncial+Antiqua&display=swap" rel="stylesheet">
   <title>Paradise</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
@@ -25,6 +27,7 @@
   <!-- Чат -->
   <div class="chat-container" id="chatContainer" style="display: none;">
     <h1>🌸 ❤ Rakhiv Paradise ❤ 🌸</h1>
+    <button id="themeToggleBtn" title="Змінити тему">🤘</button>
     <button id="openGalleryBtn" class="gallery-toggle-btn">🖼️</button>
     <div id="chat" class="chat-box"></div>
     <!-- Новий контейнер для індикатора набору тексту всередині чату -->
@@ -149,6 +152,7 @@
     const chatDisplayImage = document.getElementById('chatDisplayImage'); 
     const closeChatImageDisplayModalBtn = document.getElementById('closeChatImageDisplayModalBtn');
 
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
     // Media Controls
     const volumeToggleButton = document.getElementById('volumeToggleButton');
     const volumeSlider = document.getElementById('volumeSlider');
@@ -209,6 +213,28 @@
         // тому явний запит тут може бути не потрібен, але не завадить для діагностики, якщо є така подія на сервері.
         // socket.emit('get_tamagotchi_state'); // Якщо така подія існує
       });
+
+      // Обробник для синхронізації теми від сервера
+      socket.on('theme_changed_globally', (data) => {
+        const newTheme = data.theme;
+        const isBlackMetal = newTheme === 'black-metal';
+
+        // Застосовуємо тему, тільки якщо вона відрізняється від поточної
+        if (document.body.classList.contains('black-metal-theme') !== isBlackMetal) {
+          document.body.classList.toggle('black-metal-theme', isBlackMetal);
+          localStorage.setItem('theme', newTheme); // Зберігаємо глобально встановлену тему
+
+          if (isBlackMetal) {
+            themeToggleBtn.textContent = '☁️';
+            themeToggleBtn.title = "Переключити на світлу тему";
+          } else {
+            themeToggleBtn.textContent = '😎';
+            themeToggleBtn.title = "Переключити на темну тему";
+          }
+          console.log(`Тема синхронізована з сервером: ${newTheme}`);
+        }
+      });
+
 
       socket.on('disconnect', (reason) => {
         console.warn('Клієнт: Socket.IO відключено. Причина:', reason);
@@ -852,8 +878,44 @@
         hideCustomConfirm();
       }
     });
+    
+    // Theme toggle functionality
+    function toggleTheme() {
+      // Визначаємо, якою буде нова тема ПІСЛЯ перемикання
+      const willBeBlackMetal = !document.body.classList.contains('black-metal-theme');
+      const newTheme = willBeBlackMetal ? 'black-metal' : 'default';
 
+      // Локально оновлюємо UI негайно
+      document.body.classList.toggle('black-metal-theme', willBeBlackMetal);
+      localStorage.setItem('theme', newTheme);
+
+      if (willBeBlackMetal) {
+        themeToggleBtn.textContent = '☁️'; // Узгоджуємо з loadTheme
+        themeToggleBtn.title = "Переключити на світлу тему";
+      } else {
+        themeToggleBtn.textContent = '😎'; // Узгоджуємо з loadTheme
+        themeToggleBtn.title = "Переключити на темну тему";
+      }
+
+      // Надсилаємо запит на зміну теми на сервер
+      if (socket && socket.connected) {
+        socket.emit('request_global_theme_change', { theme: newTheme });
+      }
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'black-metal') {
+        document.body.classList.add('black-metal-theme');
+        themeToggleBtn.textContent = '☁️';
+        themeToggleBtn.title = "Переключити на світлу тему";
+      } else {
+        themeToggleBtn.textContent = '😎';
+        themeToggleBtn.title = "Переключити на темну тему";
+      }
+    }
+    themeToggleBtn.addEventListener('click', toggleTheme);
+    loadTheme(); // Load theme preference on page load
   </script>
-
 </body>
 </html>

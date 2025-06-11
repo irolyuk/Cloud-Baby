@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Nunito', sans-serif; /* Новий основний шрифт для світлої теми */
   background: linear-gradient(to bottom right, #fff0f5, #ffe4e1);
   min-height: 100vh;
   display: flex;
@@ -29,8 +29,9 @@ body {
 
 h1 {
   text-align: center;
-  color: #d63384;
+  color: #d63384; 
   font-size: 1.4rem;
+  font-family: 'Caveat', cursive; /* Ніжний шрифт для заголовка */
   margin: 0 0 5px 0; /* Зменшено нижній відступ */
 }
 
@@ -60,6 +61,7 @@ h1 {
   flex-grow: 1;
   overflow-y: auto;
   font-size: 1rem;
+  font-family: 'Caveat', cursive; /* Ніжний шрифт для повідомлень */
   /* max-height: 55vh; */ /* Максимальна висота чату, щоб не вилазило за межі контейнера */
   position: relative; /* Для позиціонування індикатора набору тексту, якщо знадобиться */
 }
@@ -75,7 +77,7 @@ h1 {
   white-space: pre-wrap;         /* ✅ Переносить \n і довгі рядки */
   overflow-wrap: break-word;     /* ✅ Браузерна підтримка */
   box-sizing: border-box;
-  font-size: 1rem; /* Зменшуємо розмір шрифту для кращого вигляду */
+  font-size: 1.15rem; /* Трохи збільшимо розмір для Caveat, щоб був читабельним */
   animation: fadeIn 0.3s ease;
   padding-right: 35px; /* Додаємо місце справа для кнопок, щоб текст не залазив під них */
 }
@@ -88,7 +90,8 @@ h1 {
   color: #777; /* Сірий колір тексту */
   background-color: #f9f9f9; /* Дуже світлий фон */
   border-radius: 10px; /* Легке закруглення */
-  font-size: 0.6rem;
+  font-size: 0.8rem; /* Трохи збільшимо для Nunito */
+  font-family: 'Nunito', sans-serif; /* Використовуємо Nunito для індикатора */
   text-align: center; /* Додаємо для центрування тексту */
   min-height: 1.2em; /* Мінімальна висота, щоб текст не зливався з іншими повідомленнями */
 }
@@ -176,7 +179,7 @@ h1 {
   margin: 5px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-family: inherit; /* Успадковує шрифт від батьківського елемента */
+  font-family: 'Caveat', cursive; /* Шрифт для поля редагування */
   font-size: inherit;   /* Успадковує розмір шрифту */
   resize: vertical;     /* Дозволити змінювати висоту textarea */
   box-sizing: border-box;
@@ -229,7 +232,8 @@ h1 {
   padding: 10px;
   border: 1px solid #f8cdda;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 1.1rem; /* Трохи збільшимо для Caveat */
+  font-family: 'Caveat', cursive; /* Шрифт для поля вводу */
   background-color: #fff0f5;
 }
 
@@ -251,6 +255,7 @@ h1 {
 .online-users {
   font-size: 0.9rem;
   color: #187537;
+  font-family: 'Nunito', sans-serif; /* Nunito для цього тексту */
   width: 100%; 
   text-align: center;
   margin-top: 10px;
@@ -259,6 +264,7 @@ h1 {
 .users-online {
   text-align: center;
   margin-top: 5px; /* Додано/змінено верхній відступ */
+  font-family: 'Nunito', sans-serif; /* Nunito для цього тексту */
 }
 
 .status-messages-container {
@@ -271,6 +277,7 @@ h1 {
 .upload-indicator {
   font-size: 0.9rem;
   color: #d63384; /* Рожевий колір, як у заголовка */  
+  font-family: 'Nunito', sans-serif; /* Nunito для цього тексту */
   margin-top: 5px; /* Додано/змінено верхній відступ */
   text-align: center;
 }
@@ -342,6 +349,7 @@ h1 {
   align-items: center;
   justify-content: center;
   line-height: 1; /* Прибирає зайву висоту рядка від шрифту */
+  font-family: 'Nunito', sans-serif; /* Явно вказуємо шрифт для назв музики */
   min-height: 36px; /* Мінімальна висота кнопки */
 }
 
@@ -420,8 +428,9 @@ h1 {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  resize: none; /* Заборонити ручну зміну розміру, якщо хочеш */
-  font-family: inherit;
+  resize: none; 
+  font-family: 'Caveat', cursive; /* Шрифт для поля вводу */
+  /* font-family: inherit; */ /* Прибираємо це, щоб 'Caveat' застосовувався */
   font-size: 1rem;
   line-height: 1.4; /* Змінено для кращого вигляду в один рядок */
   height: 20px; /* мінімальна висота */
@@ -541,6 +550,7 @@ h1 {
 .login-screen h2 {
   color: #d63384;             /* Колір тексту заголовка, як у чата */
   font-size: 1.6rem;         /* Розмір шрифту */
+  font-family: 'Caveat', cursive; /* Ніжний шрифт для заголовка */
   margin-top: 0;             /* Прибираємо верхній відступ, якщо є */
   margin-bottom: 25px;       /* Відступ знизу */
 }
@@ -550,7 +560,8 @@ h1 {
   padding: 12px;
   border: 1px solid #f8cdda; /* Світло-рожева рамка */
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 1.1rem; /* Трохи збільшимо для Caveat */
+  font-family: 'Caveat', cursive; /* Шрифт для поля вводу пароля */
   background-color: #fff0f5; /* Дуже світло-рожевий фон */
   margin-bottom: 20px;
   box-sizing: border-box;
@@ -587,6 +598,7 @@ h1 {
 #nicknameSelection p {
   margin-bottom: 10px;
   color: #555;               /* Колір тексту для підказки */
+  font-family: 'Nunito', sans-serif; /* Nunito для цього тексту */
   font-size: 1rem;
 }
 
@@ -602,6 +614,7 @@ h1 {
 
 #loginError {
   margin-top: 15px;
+  font-family: 'Nunito', sans-serif; /* Nunito для цього тексту */
   font-size: 0.9rem;
   /* колір вже заданий inline стилем style="color:red;" в HTML, тому тут його не дублюємо */
 }
@@ -882,6 +895,7 @@ h1 {
   border-radius: 4px;
   font-size: 0.85em;
   color: #495057;
+  font-family: 'Nunito', sans-serif; /* Nunito для цитати */
   cursor: pointer; /* Вказує, що можна клікнути */
   overflow: hidden;
   text-overflow: ellipsis;
@@ -898,6 +912,7 @@ h1 {
   border-bottom: 1px solid #e9ecef; /* Лінія знизу */
   margin: 5px 0; /* Відступи зверху та знизу */
   font-size: 0.9rem;
+  font-family: 'Nunito', sans-serif; /* Nunito для попереднього перегляду */
 }
 
 .reply-preview-content {
@@ -1025,6 +1040,7 @@ h1 {
 .custom-modal-content p {
   font-size: 1.1rem;
   color: #333;
+  font-family: 'Nunito', sans-serif; /* Nunito для тексту модального вікна */
   margin-top: 0;
   margin-bottom: 25px;
 }
@@ -1065,3 +1081,356 @@ h1 {
   transform: translateY(-1px);
 }
 
+
+
+/* Theme Toggle Button Style */
+#themeToggleBtn {
+  position: absolute;
+  top: 12px; /* Такий же відступ зверху, як у кнопки галереї */
+  left: 15px; /* Відступ зліва */
+  background-color: #fde4f0; /* Світло-рожевий, схожий на інші кнопки управління */
+  border: 1px solid #ffc0cb; /* Рожева рамка */
+  color: #d63384; /* Колір іконки, як у заголовка */
+  border-radius: 50%; /* Кругла кнопка */
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem; /* Розмір іконки */
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10; /* Щоб була поверх інших елементів чату */
+  padding: 0;
+  line-height: 1;
+  /* margin-left: 5px; - Прибираємо, бо кнопка тепер абсолютно позиціонована */
+}
+
+#themeToggleBtn:hover {
+  background-color: #ffc0cb; /* Світло-рожевий при наведенні, як у emoji-toggle-btn */
+  color: #d63384; /* Колір іконки залишається */
+  transform: scale(1.1);
+}
+
+
+
+/* Black Metal Theme Styles */
+body.black-metal-theme {
+  background: #050505; /* Повністю темний фон для сторінки, перекриває градієнт */
+  color: #c0c0c0;
+  font-family: 'Uncial Antiqua', cursive; 
+  font-size: 0.95rem; /* Трохи зменшуємо базовий розмір шрифту для темної теми */
+}
+
+/* --- Login Screen --- */
+
+.black-metal-theme .login-screen {
+  background-color: #111;
+  border: 1px solid #333;
+  box-shadow: 0 0 25px rgba(120, 100, 100, 0.4);
+}
+
+.black-metal-theme .login-screen h2 {
+  color: #b8860b; /* DarkGoldenrod */
+  text-shadow: 1px 1px #000;
+  font-family: 'Metal Mania', cursive; 
+  font-size: 1.8rem; /* Зберігаємо більший розмір для заголовка */
+}
+
+.black-metal-theme input[type="password"],
+.black-metal-theme .chat-input { /* Об'єднано з input[type="password"] нижче для консистенції */
+  font-family: 'Uncial Antiqua', cursive; /* Агресивний шрифт для полів вводу */
+  background-color: #1f1f1f;
+  color: #c0c0c0;
+  border: 1px solid #383838;
+  border-radius: 3px;
+  font-size: 0.9rem; /* Зменшуємо розмір шрифту для полів вводу */
+}
+
+.black-metal-theme input[type="password"]::placeholder,
+.black-metal-theme .chat-input::placeholder {
+  color: #555;
+}
+/* --- Buttons --- */
+
+.black-metal-theme button,
+.black-metal-theme .item-btn,
+.black-metal-theme .chat-button,
+.black-metal-theme .action-btn,
+.black-metal-theme .gallery-toggle-btn,
+.black-metal-theme #themeToggleBtn, /* Стиль для кнопки теми в темному режимі */
+.black-metal-theme .attach-btn,
+.black-metal-theme .emoji-toggle-btn,
+.black-metal-theme .custom-modal-btn {
+  font-size: 0.9rem; /* Зменшуємо шрифт для кнопок */
+  font-family: 'Uncial Antiqua', cursive; /* Агресивний шрифт для кнопок */
+  background-color: #222;
+  color: #b0b0b0;
+  border: 1px solid #444;
+  box-shadow: 0 0 3px rgba(0,0,0,0.4) inset, 0 0 1px rgba(200,200,200,0.2);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.black-metal-theme button:hover,
+.black-metal-theme .item-btn:hover,
+.black-metal-theme .chat-button:hover,
+.black-metal-theme .action-btn:hover,
+.black-metal-theme .gallery-toggle-btn:hover,
+.black-metal-theme #themeToggleBtn:hover,
+.black-metal-theme .attach-btn:hover,
+.black-metal-theme .emoji-toggle-btn:hover,
+.black-metal-theme .custom-modal-btn:hover {
+  background-color: #333;
+  color: #fff;
+  border-color: #666;
+}
+
+.black-metal-theme #themeToggleBtn { /* Специфічний стиль для кнопки теми */
+  /* Позиціонування та розміри успадковуються */
+  background-color: #1a1a1a; /* Такий же, як інші кнопки в темній темі */
+  color: #b8860b; /* DarkGoldenrod */
+  border: 1px solid #333; /* Рамка, як у інших кнопок */
+}
+.black-metal-theme #themeToggleBtn:hover {
+  background-color: #333; /* Стандартний hover для кнопок темної теми */
+  color: #fff;
+  border-color: #666; /* Стандартний hover для кнопок темної теми */
+  /* transform: scale(1.1); - вже є з основного стилю кнопки */
+}
+
+
+/* --- Chat Container & Header --- */
+
+.black-metal-theme .chat-container {
+  background-color: #0e0e0e; /* Темний фон для контейнера чату */
+  border: 2px solid #282828; /* Чіткіша рамка */
+  box-shadow: 0 0 20px rgba(120, 0, 0, 0.4); /* Більш виразна тінь з червонуватим відтінком */
+}
+
+
+.black-metal-theme .chat-container h1 {
+  color: #b8860b; /* DarkGoldenrod */
+  text-shadow: 1px 1px #000, 0 0 8px #b8860b, 0 0 15px #ff0000; /* Додано червоне світіння */
+  font-family: 'Metal Mania', cursive; 
+  letter-spacing: 1px;
+  font-size: 1.6rem; /* Зберігаємо більший розмір для заголовка чату */
+}
+
+/* --- Chat Box & Messages --- */
+
+.black-metal-theme .chat-box {
+  background-color: #121212; /* Трохи світліший за контейнер */
+  border: 1px solid #2b2b2b;
+  font-family: 'Uncial Antiqua', cursive; /* Агресивний шрифт для повідомлень */
+  font-size: 0.9rem; /* Зменшуємо шрифт для повідомлень */
+}
+
+.black-metal-theme .message {
+  background-color: #1a1a1a; /* Світліший за чат-бокс */
+  border: 1px solid #333;
+  color: #a0a0a0;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  border-radius: 4px;
+  /* Розмір шрифту успадковується від .chat-box */
+}
+
+.black-metal-theme .message-baby {
+  background-color: #380000 !important; /* Темно-червоний, !important для перекриття */
+  color: #ff9a9a;
+  border-left: 3px solid #700000 !important; /* Ще темніший червоний, !important */
+  border-top-left-radius: 0; /* Зберігаємо форму */
+}
+
+.black-metal-theme .message-cloud {
+  background-color: #101030 !important; /* Темно-синій/фіолетовий, !important */
+  color: #babaff;
+  border-right: 3px solid #000045 !important; /* Ще темніший синій/фіолетовий, !important */
+  border-top-right-radius: 0; /* Зберігаємо форму */
+}
+ 
+.black-metal-theme .message-sender {
+  color: #b8860b; /* DarkGoldenrod для імен відправників */
+  font-weight: bold;
+}
+
+.black-metal-theme .message-baby .message-sender {
+  color: #ff7777; /* Яскравіший червоний для Baby */
+}
+
+.black-metal-theme .message-cloud .message-sender {
+  color: #9999ff; /* Яскравіший синій для Cloud */
+}
+
+.black-metal-theme .reply-quote-user-baby-color,
+.black-metal-theme .reply-user-baby-color {
+    color: #ff7777 !important;
+}
+.black-metal-theme .reply-quote-user-cloud-color,
+.black-metal-theme .reply-user-cloud-color {
+    color: #9999ff !important;
+}
+
+.black-metal-theme .message-reply-quote {
+  background-color: #202020;
+  border-left: 3px solid #444;
+  color: #888;
+  padding: 4px 6px;
+  font-family: 'Uncial Antiqua', cursive; /* Шрифт для цитат */
+  font-size: 0.85rem; /* Трохи менший шрифт для цитат */
+  margin-bottom: 4px;
+  border-radius: 3px;
+}
+
+.black-metal-theme .typing-message-in-chat {
+  background-color: #101010; /* Дуже темний, як фон контейнера або трохи світліше */
+  border-top: 1px solid #282828;
+  color: #999;
+  font-family: 'Uncial Antiqua', cursive; /* Шрифт для індикатора набору */
+  font-size: 0.8rem; /* Менший шрифт для індикатора */
+  font-style: italic;
+}
+
+/* --- Media Controls, Reply Preview, Input Area --- */
+
+.black-metal-theme .media-controls-area {
+  background-color: #0c0c0c; /* Дуже темний, як контейнер чату */
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222; /* Розділення від наступних блоків */
+  padding: 8px 10px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.black-metal-theme .items { /* Контейнер кнопок музики */
+    background-color: #181818; /* Темно-сірий */
+    border: 1px solid #303030;
+    border-radius: 5px;
+    /* Шрифт для кнопок музики вже встановлено через .black-metal-theme .item-btn */
+    padding: 5px 8px;
+}
+
+.black-metal-theme .item-btn.playing {
+  background-color: #b8860b;
+  color: #000;
+  border-color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 10px #b8860b;
+}
+
+.black-metal-theme .volume-slider::-webkit-slider-thumb {
+  background: #b8860b;
+  border: 1px solid #000;
+}
+.black-metal-theme .volume-slider::-moz-range-thumb {
+  background: #b8860b;
+  border: 1px solid #000;
+}
+
+.black-metal-theme .reply-preview {
+  background-color: #161616; /* Темний, але світліший за фон контейнера */
+  border-top: 1px solid #2d2d2d;
+  border-bottom: 1px solid #2d2d2d; /* Якщо є поле вводу знизу */
+  color: #a0a0a0;
+  font-family: 'Uncial Antiqua', cursive; /* Шрифт для попереднього перегляду відповіді */
+  font-size: 0.85rem; /* Менший шрифт для попереднього перегляду */
+  padding: 6px 10px;
+}
+
+.black-metal-theme .input-controls {
+  background-color: #0c0c0c; /* Такий же, як media-controls-area */
+  padding: 8px 10px;
+  border-top: 1px solid #222; /* Якщо reply-preview не відображається */
+}
+
+/* --- Emoji Panel --- */
+
+.black-metal-theme .emoji-panel {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.black-metal-theme .emoji-panel span {
+  color: #c0c0c0;
+}
+.black-metal-theme .emoji-panel span:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+/* --- Users Online Indicator --- */
+
+.black-metal-theme .users-online {
+  color: #777;
+  font-family: 'Uncial Antiqua', cursive; /* Шрифт для індикатора онлайн */
+  font-size: 0.8rem; /* Менший шрифт для індикатора онлайн */
+  font-style: italic;
+}
+.black-metal-theme .users-online .finger-lightning-container .finger {
+    filter: grayscale(50%) brightness(0.7);
+}
+.black-metal-theme .users-online .finger-lightning-container .lightning {
+    filter: brightness(0.8) contrast(1.2);
+}
+
+/* --- Modals (Gallery, Custom Confirm) --- */
+
+.black-metal-theme .gallery-modal .gallery-content {
+  background-color: rgba(5, 5, 5, 0.95); /* Напівпрозорий фон */
+  border: 2px solid #444;
+  box-shadow: 0 0 20px #000;
+}
+.black-metal-theme .gallery-modal .gallery-close-btn,
+.black-metal-theme .gallery-modal .gallery-nav-btn {
+  background-color: #1a1a1a;
+  color: #b8860b;
+  border: 1px solid #333;
+}
+.black-metal-theme .gallery-modal .gallery-close-btn:hover,
+.black-metal-theme .gallery-modal .gallery-nav-btn:hover {
+  background-color: #b8860b;
+  color: #000;
+  border-color: #000;
+}
+
+.black-metal-theme .custom-modal-content {
+  background-color: #111;
+  border: 1px solid #555;
+  color: #c0c0c0;
+  font-family: 'Uncial Antiqua', cursive; /* Шрифт для тексту модального вікна */
+  font-size: 0.9rem; /* Шрифт для тексту модального вікна */
+  box-shadow: 0 0 30px rgba(150, 0, 0, 0.5); /* Червонувата тінь */
+}
+.black-metal-theme .custom-modal-ok-btn {
+  background-color: #600; /* Темно-червоний */
+  color: #eee;
+}
+.black-metal-theme .custom-modal-ok-btn:hover {
+  background-color: #900;
+}
+.black-metal-theme .custom-modal-cancel-btn {
+  background-color: #333;
+}
+.black-metal-theme .custom-modal-cancel-btn:hover {
+  background-color: #555;
+}
+
+/* --- Scrollbar --- */
+.black-metal-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.black-metal-theme ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+.black-metal-theme ::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+.black-metal-theme ::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+/* Для Firefox */
+.black-metal-theme {
+  scrollbar-width: thin;
+  scrollbar-color: #444 #1a1a1a;
+}

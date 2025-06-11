@@ -18,21 +18,25 @@ ping_interval=25)   # Інтервал надсилання ping (в секун�
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
 current_global_track = None # Зберігає поточний глобальний трек: {'audiosrc': 'path/to/song.mp3'} або None
+current_global_theme = 'default' # Зберігаємо поточну глобальну тему
 
 
 @socketio.on('connect')
 def handle_connect():
     # При підключенні нового клієнта, надсилаємо йому поточний стан музики
-    global current_global_track
+    global current_global_track, current_global_theme
     if current_global_track:
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
     
+    # Надсилаємо поточну глобальну тему новому клієнту
+    emit('theme_changed_globally', {'theme': current_global_theme}, to=request.sid)
+    
     # Решта логіки підключення (наприклад, очікування 'register') залишається
 @socketio.on('register')
 def handle_register(nickname):
-    global current_global_track # Доступ до глобальних змінних
+    global current_global_track, current_global_theme # Доступ до глобальних змінних
     users[request.sid] = nickname
     emit("users_online", list(users.values()), broadcast=True)
     # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
@@ -41,6 +45,9 @@ def handle_register(nickname):
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
     else:
         emit('update_global_music_state', {'status': 'stopped'}, to=request.sid)
+    
+    # Надсилаємо поточну глобальну тему після реєстрації
+    emit('theme_changed_globally', {'theme': current_global_theme}, to=request.sid)
     
     # Логіка запуску таймера Тамагочі видалена
 
@@ -134,6 +141,16 @@ def handle_control_global_music(data):
         if current_global_track and current_global_track['audiosrc'] == audiosrc:
             current_global_track = None
             emit('update_global_music_state', {'status': 'stopped'}, broadcast=True)
+
+@socketio.on('request_global_theme_change')
+def handle_request_global_theme_change(data):
+    global current_global_theme
+    new_theme = data.get('theme')
+    if new_theme in ['default', 'black-metal']: # Валідація
+        current_global_theme = new_theme
+        print(f"Global theme changed to: {current_global_theme} by {users.get(request.sid, 'Unknown')}")
+        emit('theme_changed_globally', {'theme': current_global_theme}, broadcast=True)
+
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
 # але логіка в 'connect' та 'register' має покривати більшість випадків.
