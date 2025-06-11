@@ -1,9 +1,12 @@
-from flask import Flask, request # type: ignore
+from flask import Flask, request, Response # type: ignore
 from flask_socketio import SocketIO, send, emit # type: ignore
 from flask_cors import CORS # type: ignore
 import uuid # Для генерації унікальних ID
 import threading
 import time # Потрібен для відстеження часу
+from functools import wraps # Для створення декораторів
+import os # Для доступу до змінних середовища
+
 
 app = Flask(__name__)
 CORS(app) # Дозволяє запити з усіх джерел
@@ -14,6 +17,11 @@ cors_allowed_origins="*",
 max_http_buffer_size=10 * 1024 * 1024, # Збільшуємо до 10MB
 ping_timeout=60,    # Час очікування відповіді pong (в секундах)
 ping_interval=25)   # Інтервал надсилання ping (в секундах)
+
+# --- Адміністративний пароль ---
+# Краще встановити через змінну середовища ADMIN_PASSWORD
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin') # Можна також задати ім'я користувача
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '26060512') # ЗАМІНІТЬ ЦЕ НАДІЙНИМ ПАРОЛЕМ!
 
 users = {}  # Зберігає нікнейми активних користувачів
 history = []
@@ -186,7 +194,29 @@ def handle_disconnect():
 def index():
     return "WebSocket сервер працює!"
 
+# --- Декоратор для HTTP Basic Auth ---
+def check_auth(username, password):
+    """Перевіряє, чи надані ім'я користувача та пароль є правильними."""
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+
+def authenticate():
+    """Надсилає відповідь 401 Unauthorized, запитуючи аутентифікацію."""
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
 @app.route('/admin/online_users')
+@requires_auth # Застосовуємо декоратор аутентифікації
 def show_online_users():
     online_users_details = []
     for sid, data in users.items():
@@ -199,6 +229,5 @@ def show_online_users():
 
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 10000))
     socketio.run(app, host="0.0.0.0", port=port)
