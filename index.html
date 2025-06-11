@@ -192,6 +192,7 @@
     const notificationSound = document.getElementById('notificationSound');
 
     // Global Constants
+    const SERVER_URL = "https://cloud-baby.onrender.com"; // Визначаємо базову URL сервера
     const avatars = {
      "Baby 😎": "😎",
      "Pink Cloud ☁️": "☁️"
@@ -208,7 +209,7 @@
       loginError.textContent = "Перевірка...";
 
       try {
-        const response = await fetch('/api/chat-config'); // Запит до нового ендпоінту
+        const response = await fetch(`${SERVER_URL}/api/chat-config`); // Використовуємо повну URL
         if (!response.ok) {
           throw new Error(`Помилка сервера: ${response.status}`);
         }
@@ -240,7 +241,7 @@
     }
 
     function startChat() {
-      socket = io("https://cloud-baby.onrender.com", {
+      socket = io(SERVER_URL, { // Використовуємо SERVER_URL для Socket.IO
         transports: ["websocket"]
       });
 
