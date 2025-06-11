@@ -24,6 +24,7 @@ current_global_theme = 'default' # Зберігаємо поточну глоб�
 @socketio.on('connect')
 def handle_connect():
     # При підключенні нового клієнта, надсилаємо йому поточний стан музики
+    print(f"Client connected from IP: {request.remote_addr}, SID: {request.sid}")
     global current_global_track, current_global_theme
     if current_global_track:
         emit('update_global_music_state', {'status': 'playing', 'audiosrc': current_global_track['audiosrc']}, to=request.sid)
@@ -37,8 +38,9 @@ def handle_connect():
 @socketio.on('register')
 def handle_register(nickname):
     global current_global_track, current_global_theme # Доступ до глобальних змінних
-    users[request.sid] = nickname
-    emit("users_online", list(users.values()), broadcast=True)
+    users[request.sid] = {'nickname': nickname, 'ip': request.remote_addr}
+    print(f"User {nickname} (SID: {request.sid}, IP: {request.remote_addr}) registered.")
+    emit("users_online", [data['nickname'] for data in users.values()], broadcast=True)
     # Також надсилаємо стан музики після реєстрації, якщо connect спрацював раніше
     # (це для надійності, хоча emit в 'connect' має спрацювати)
     if current_global_track:
@@ -56,12 +58,13 @@ def handle_register(nickname):
 def handle_message(msg):
     # Тепер 'msg' - це об'єкт: { type: 'text'/'image', text: '...', image: '...' }
     user_sid = request.sid
-    user = users.get(user_sid, "Unknown")
-    
+    user_data = users.get(user_sid)
+    user_nickname = user_data['nickname'] if user_data else "Unknown"
+
     # Створюємо об'єкт повідомлення для збереження та відправки
     message_data = {
         "messageId": str(uuid.uuid4()), # Генеруємо унікальний ID для повідомлення
-        "user": user,
+        "user": user_nickname,
         "type": msg.get('type', 'text'), # Тип повідомлення, за замовчуванням 'text'
         "text": msg.get('text'),         # Текст
         "image": msg.get('image'),       # Дані зображення, будуть None для тексту
@@ -79,30 +82,33 @@ def handle_history():
 
 @socketio.on('typing')
 def handle_typing(is_typing):
-    user = users.get(request.sid, "Unknown")
-    emit("typing", {"user": user, "typing": is_typing}, broadcast=True, include_self=False)
+    user_data = users.get(request.sid)
+    user_nickname = user_data['nickname'] if user_data else "Unknown"
+    emit("typing", {"user": user_nickname, "typing": is_typing}, broadcast=True, include_self=False)
 
 @socketio.on('delete_message')
 def handle_delete_message(data):
     message_id_to_delete = data.get('messageId')
     user_sid = request.sid
-    requesting_user = users.get(user_sid)
+    requesting_user_data = users.get(user_sid)
+    requesting_user_nickname = requesting_user_data['nickname'] if requesting_user_data else None
 
     # global history # 'global' не потрібен тут, оскільки ми модифікуємо список на місці
     message_found = False
     for message in history:
         if message.get('messageId') == message_id_to_delete:
             # Перевірка, чи користувач, який видаляє, є автором повідомлення
-            if message.get('user') == requesting_user:
+            if message.get('user') == requesting_user_nickname:
                 history.remove(message)
                 emit('message_deleted', {'messageId': message_id_to_delete}, broadcast=True)
                 message_found = True
             else:
                 # Можна надіслати помилку користувачу, якщо він намагається видалити чуже повідомлення
-                emit('action_error', {'message': 'Ви не можете видалити це повідомлення.'}, to=user_sid)
+                if requesting_user_nickname: # Надсилаємо помилку, тільки якщо користувач ще підключений
+                    emit('action_error', {'message': 'Ви не можете видалити це повідомлення.'}, to=user_sid)
             break
     # Якщо повідомлення не знайдено (можливо, вже видалено або невірний ID)
-    if not message_found and requesting_user: # Переконуємося, що requesting_user існує перед надсиланням помилки
+    if not message_found and requesting_user_nickname: # Переконуємося, що requesting_user існує перед надсиланням помилки
         emit('action_error', {'message': 'Повідомлення для видалення не знайдено.'}, to=user_sid)
 
 @socketio.on('edit_message')
@@ -110,16 +116,17 @@ def handle_edit_message(data):
     message_id_to_edit = data.get('messageId')
     new_text = data.get('newText')
     user_sid = request.sid
-    requesting_user = users.get(user_sid)
+    requesting_user_data = users.get(user_sid)
+    requesting_user_nickname = requesting_user_data['nickname'] if requesting_user_data else None
 
-    if not requesting_user: # Користувач міг відключитися
+    if not requesting_user_nickname: # Користувач міг відключитися або не зареєстрований
         return
 
     for message in history:
-        if message.get('messageId') == message_id_to_edit and message.get('user') == requesting_user and message.get('type') == 'text':
+        if message.get('messageId') == message_id_to_edit and message.get('user') == requesting_user_nickname and message.get('type') == 'text':
             message['text'] = new_text
             # Надсилаємо оновлене повідомлення всім. Важливо передати 'user', щоб фронтенд знав, хто автор.
-            emit('message_edited', {'messageId': message_id_to_edit, 'newText': new_text, 'user': requesting_user}, broadcast=True)
+            emit('message_edited', {'messageId': message_id_to_edit, 'newText': new_text, 'user': requesting_user_nickname}, broadcast=True)
             return
     # Якщо повідомлення не знайдено або не може бути відредаговано
     emit('action_error', {'message': 'Повідомлення для редагування не знайдено або не може бути змінено.'}, to=user_sid)
@@ -147,20 +154,25 @@ def handle_request_global_theme_change(data):
     global current_global_theme
     new_theme = data.get('theme')
     if new_theme in ['default', 'black-metal']: # Валідація
+        user_data = users.get(request.sid)
+        user_nickname = user_data['nickname'] if user_data else "Unknown"
+        user_ip = user_data['ip'] if user_data else request.remote_addr # IP з реєстрації або поточний
         current_global_theme = new_theme
-        print(f"Global theme changed to: {current_global_theme} by {users.get(request.sid, 'Unknown')}")
+        print(f"Global theme changed to: {current_global_theme} by {user_nickname} (IP: {user_ip}, SID: {request.sid})")
         emit('theme_changed_globally', {'theme': current_global_theme}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
     user_sid = request.sid
     if user_sid in users:
-        nickname = users.pop(user_sid)
-        print(f"User {nickname} (SID: {user_sid}) disconnected.")
+        user_data = users.pop(user_sid)
+        nickname = user_data['nickname']
+        ip_address = user_data['ip']
+        print(f"User {nickname} (SID: {user_sid}, IP: {ip_address}) disconnected.")
         # Оновлюємо список онлайн користувачів для всіх інших
-        emit("users_online", list(users.values()), broadcast=True)
+        emit("users_online", [data['nickname'] for data in users.values()], broadcast=True)
     else:
-        print(f"User with SID: {user_sid} disconnected before registration or was already removed.")
+        print(f"User with SID: {user_sid} (IP: {request.remote_addr}) disconnected before registration or was already removed.")
 
 
 # Можливо, знадобиться обробник для явного запиту стану музики,
@@ -176,9 +188,15 @@ def index():
 
 @app.route('/admin/online_users')
 def show_online_users():
-    # Переконуємося, що ми працюємо в контексті Flask-запиту,
-    # але users - це глобальна змінна, тому доступна.
-    return {"online_users": list(users.values()), "count": len(users)}
+    online_users_details = []
+    for sid, data in users.items():
+        online_users_details.append({
+            'sid': sid,
+            'nickname': data['nickname'],
+            'ip': data.get('ip', 'N/A') # .get('ip') для безпеки, якщо раптом IP не записався
+        })
+    return {"online_users_details": online_users_details, "count": len(users)}
+
 
 if __name__ == '__main__':
     import os
